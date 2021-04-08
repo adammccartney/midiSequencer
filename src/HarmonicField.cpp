@@ -1,52 +1,80 @@
 #include "HarmonicField.h"
 
-HarmonicFieldGraph::HarmonicFieldGraph(){}
+
+Timespan::Timespan(){
+    _start.x = 0.0;
+    _start.y = ofGetHeight() / 2.0;
+    _end.x   = ofGetWidth();
+    _end.y   = ofGetHeight() / 2.0;
+}
+
+Timespan::~Timespan(){}
+
+float Timespan::getLength(){ 
+    float len = (_end.x - _start.x) / (_end.y - _start.y); 
+    return len;
+}
+
+void Timespan::draw(){
+    ofDrawLine(_start.x, _start.y, _end.x, _end.y);
+}
+
+void Timespan::setNumHfields(const int &nfields){
+    _numHfields = nfields + 1; // nfields is passed as a vector<Hfields>.size() 
+}
+
+int Timespan::getNumHfields(){ return _numHfields; }
+
+//-----------------------------------------------------------------------------
+// 
+
+HarmonicFieldGraph::HarmonicFieldGraph(char n)
+    :name{n}
+{
+    this->setID();
+}
+
 HarmonicFieldGraph::~HarmonicFieldGraph(){}
 
+
+//-----------------------------------------------------------------------------
+
 void HarmonicFieldGraph::setup(){
-    // point for x origin is where field crosses timespan 
-    // setup involves first getting the x coordinate for all ofPath
-    // this x coordinate is the point of intersection with the timespan
-    params.setName("hfield params");
-    params.add(x.set("x", ofGetWidth() / 2, 0, ofGetWidth()));
-    params.add(y.set("y", ofGetHeight() / 2, 0, ofGetHeight())); 
+    // use _pos to determine position on timeline 
+    // represents a subsection on the horizontal axis
     
+    // setup variables for assignment along the x axis
+    length    = timespan->getLength() / timespan->getNumHfields();
+
+    // assign specific values to harmonic field graph
+    hfxOrigin = timespan->getStart().x * this->getID(); 
+    localMin  = hfxOrigin;
+    localMax  = hfxOrigin + length * this->getID(); 
+
+    params.setName(toString());
+    params.add(x.set("x", hfxOrigin, localMin, localMax));
+    params.add(y.set("y", ofGetHeight() / 2, 0, ofGetHeight())); 
+
+    updatePoints();
+}
+
+void HarmonicFieldGraph::updatePoints(){
+    // empty vector of current points
+    keypoints.clear();
     // this part is setup of the basic keyboard shape
     for(int i = 0; i < _numtones; i++){
-        keypoints[i][0] = ofVec2f(x, y - i*10);
-        keypoints[i][1] = ofVec2f(x + _width, y - i*10);
-        keypoints[i][2] = ofVec2f(x + _width, y - i*10 - _height);
-        keypoints[i][3] = ofVec2f(x, y - i*10 - _height);
+        vector <ofVec2f> vec{ ofVec2f(x, y - i*10),
+                              ofVec2f(x + _width, y - i*10),
+                              ofVec2f(x + _width, y - i*10 - _height),
+                              ofVec2f(x, y - i*10 - _height) };
+        keypoints.push_back(vec);
     }
 }
 
-/*
-// old drawing loop
-for(int i = 0; i < _numtones; i++){
-        ofPath npath;
-        npath.moveTo(x, y - i*10);
-        npath.lineTo(x + _width, y - i*10);
-        npath.lineTo(x + _width, y - i*10 - _height);
-        npath.lineTo(x, y - i*10 - _height);
-        npath.close();
-        // color according to piano keyboard
-        if((i == 1) || (i == 3) || (i == 6) || (i == 8) || (i == 10)){
-            npath.setStrokeColor(ofColor::black);
-            npath.setFillColor(ofColor::black);
-            npath.setFilled(true);
-            npath.setStrokeWidth(2);
-        }else{
-            npath.setStrokeColor(ofColor::black);
-            npath.setFillColor(ofColor::white);
-            npath.setFilled(true);
-            npath.setStrokeWidth(2);
-        }
-        tones.push_back(npath);
-    }
-*/
-
 void HarmonicFieldGraph::draw(){
-    
+
+    updatePoints();
+   
     // draw paths according to points
     for(size_t i = 0; i < keypoints.size(); i++){
         ofPath npath;
@@ -73,3 +101,36 @@ void HarmonicFieldGraph::draw(){
 
 void HarmonicFieldGraph::update(){}
 
+string HarmonicFieldGraph::toString(){
+    string str = "Hfield ";
+    str.push_back(name);
+    return str;
+}
+
+
+//------------------------------------------------------------
+// assign a numeric value to harmonic field based on name
+//
+void HarmonicFieldGraph::setID(){
+    switch(this->name){
+        case 'a':
+            _id = 1;
+            break;
+        case 'b':
+            _id = 2;
+            break;
+        case 'c':
+            _id = 3;
+            break;
+        case 'd':
+            _id = 4;
+            break;
+        case 'e':
+            _id = 5;
+            break;
+        default:
+            _id = -1; // negative val means name is not valid
+    }
+}
+
+int HarmonicFieldGraph::getID(){ return _id; }

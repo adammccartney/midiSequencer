@@ -5,27 +5,29 @@ void ofApp::setup(){
     ofBackground(120);
     ofSetFrameRate(60);
 
-    sliderGroup.setName("sliders");
-    sliderGroup.add(intSlider.set("int slider", 3, 3, 64));
-    sliderGroup.add(floatSlider.set("float slider", 32, 32, 256));
 
-    hfield1.setup();
-
-    mainGroup.add(hfield1.params);
-    mainGroup.add(sliderGroup);
-
+    const int nhfields = hfgrphs.size() + 1; // setting up this constant  
+    timespan.setNumHfields(nhfields); // critical function, cleanup?
+    
+    for(auto i = 0; i < hfgrphs.size(); i++){
+        // set up some naming conventions for hfield parameters
+        hfgrphs[i]->timespan = &timespan;
+        hfgrphs[i]->setup();
+        mainGroup.add(hfgrphs[i]->params);
+    }
     gui.setup(mainGroup);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    ofSetCircleResolution(intSlider);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    hfield1.draw();
-
+    timespan.draw();
+    for(auto i = 0; i < hfgrphs.size(); i++){
+        hfgrphs[i]->draw();
+    }
     gui.draw();
 
 }

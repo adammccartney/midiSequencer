@@ -27,9 +27,19 @@ class ofApp : public ofBaseApp{
 
         ofParameterGroup sliderGroup;
 
-        ofParameter<int> intSlider;
-        ofParameter<float> floatSlider;
+        ofParameter<int> hfield1Slider;
+        ofParameter<int> hfield2Slider;
+        ofParameter<int> hfield3Slider;
+        ofParameter<int> hfield4Slider;
 
-        HarmonicFieldGraph hfield1;  
+        HarmonicFieldGraph hfield1{'a'}; 
+        HarmonicFieldGraph hfield2{'b'};  
+        HarmonicFieldGraph hfield3{'c'};  
+        HarmonicFieldGraph hfield4{'d'};
+        
+        const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
+        
         ofParameterGroup mainGroup;
+
+        Timespan timespan;
 };
