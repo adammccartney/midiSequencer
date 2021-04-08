@@ -9,7 +9,7 @@ class Timespan{
 
 public:
 
-   Timespan();
+   Timespan(const int nhf);
    ~Timespan();
 
    void draw();
@@ -18,20 +18,18 @@ public:
    ofVec2f getStart() { return _start; }
    ofVec2f getEnd() { return _end; }
 
-   void setNumHfields(const int &nfields);
-   int getNumHfields();
+   const int numHfields;
 
 private:
    ofVec2f _start;
    ofVec2f _end;
-   int _numHfields;
 
 };
 
 class HarmonicFieldGraph{
 
 public:
-    HarmonicFieldGraph(char n); 
+    HarmonicFieldGraph(char n, Timespan& ts); 
     ~HarmonicFieldGraph();
 
     void setup();
@@ -44,9 +42,9 @@ public:
     ofParameter<int> x;
     ofParameter<int> y;
 
-    Timespan* timespan;
     vector<vector<ofVec2f>> keypoints; // each key contains 4 ofVec2f points
     char name;
+    Timespan& timespan;
     string toString();
     void setID();
     int getID();

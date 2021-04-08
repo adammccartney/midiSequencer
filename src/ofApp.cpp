@@ -5,13 +5,8 @@ void ofApp::setup(){
     ofBackground(120);
     ofSetFrameRate(60);
 
-
-    const int nhfields = hfgrphs.size() + 1; // setting up this constant  
-    timespan.setNumHfields(nhfields); // critical function, cleanup?
-    
     for(auto i = 0; i < hfgrphs.size(); i++){
         // set up some naming conventions for hfield parameters
-        hfgrphs[i]->timespan = &timespan;
         hfgrphs[i]->setup();
         mainGroup.add(hfgrphs[i]->params);
     }

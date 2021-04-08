@@ -1,7 +1,9 @@
 #include "HarmonicField.h"
 
 
-Timespan::Timespan(){
+Timespan::Timespan(const int nhf)
+    : numHfields{nhf}
+{
     _start.x = 0.0;
     _start.y = ofGetHeight() / 2.0;
     _end.x   = ofGetWidth();
@@ -19,19 +21,14 @@ void Timespan::draw(){
     ofDrawLine(_start.x, _start.y, _end.x, _end.y);
 }
 
-void Timespan::setNumHfields(const int &nfields){
-    _numHfields = nfields + 1; // nfields is passed as a vector<Hfields>.size() 
-}
-
-int Timespan::getNumHfields(){ return _numHfields; }
-
 //-----------------------------------------------------------------------------
 // 
 
-HarmonicFieldGraph::HarmonicFieldGraph(char n)
-    :name{n}
+HarmonicFieldGraph::HarmonicFieldGraph(char n, Timespan& ts)
+    :name{n}, timespan{ts}
 {
     this->setID();
+    
 }
 
 HarmonicFieldGraph::~HarmonicFieldGraph(){}
@@ -44,10 +41,10 @@ void HarmonicFieldGraph::setup(){
     // represents a subsection on the horizontal axis
     
     // setup variables for assignment along the x axis
-    length    = timespan->getLength() / timespan->getNumHfields();
+    length    = timespan.getLength() / timespan.numHfields;
 
     // assign specific values to harmonic field graph
-    hfxOrigin = timespan->getStart().x * this->getID(); 
+    hfxOrigin = timespan.getStart().x * this->getID(); 
     localMin  = hfxOrigin;
     localMax  = hfxOrigin + length * this->getID(); 
 
