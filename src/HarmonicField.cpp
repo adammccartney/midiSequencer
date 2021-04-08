@@ -8,14 +8,12 @@ Timespan::Timespan(const int nhf)
     _start.y = ofGetHeight() / 2.0;
     _end.x   = ofGetWidth();
     _end.y   = ofGetHeight() / 2.0;
+    _len     = _start.distance(_end);
 }
 
 Timespan::~Timespan(){}
 
-float Timespan::getLength(){ 
-    float len = (_end.x - _start.x) / (_end.y - _start.y); 
-    return len;
-}
+float Timespan::getLength(){ return _len; }
 
 void Timespan::draw(){
     ofDrawLine(_start.x, _start.y, _end.x, _end.y);
@@ -28,7 +26,6 @@ HarmonicFieldGraph::HarmonicFieldGraph(char n, Timespan& ts)
     :name{n}, timespan{ts}
 {
     this->setID();
-    
 }
 
 HarmonicFieldGraph::~HarmonicFieldGraph(){}
@@ -40,13 +37,11 @@ void HarmonicFieldGraph::setup(){
     // use _pos to determine position on timeline 
     // represents a subsection on the horizontal axis
     
-    // setup variables for assignment along the x axis
+    // setup member variables to handle location and positioning
     length    = timespan.getLength() / timespan.numHfields;
-
-    // assign specific values to harmonic field graph
-    hfxOrigin = timespan.getStart().x * this->getID(); 
+    hfxOrigin = timespan.getStart().x + ( length * (getID() - 1)); // from 0 
     localMin  = hfxOrigin;
-    localMax  = hfxOrigin + length * this->getID(); 
+    localMax  = hfxOrigin + length; 
 
     params.setName(toString());
     params.add(x.set("x", hfxOrigin, localMin, localMax));
@@ -56,14 +51,16 @@ void HarmonicFieldGraph::setup(){
 }
 
 void HarmonicFieldGraph::updatePoints(){
-    // empty vector of current points
+    // this grabs info from the gui Sliders and updates the shape's data 
+
     keypoints.clear();
+    
     // this part is setup of the basic keyboard shape
     for(int i = 0; i < _numtones; i++){
         vector <ofVec2f> vec{ ofVec2f(x, y - i*10),
                               ofVec2f(x + _width, y - i*10),
                               ofVec2f(x + _width, y - i*10 - _height),
-                              ofVec2f(x, y - i*10 - _height) };
+                              ofVec2f(x, y - i*10 - _height)};
         keypoints.push_back(vec);
     }
 }

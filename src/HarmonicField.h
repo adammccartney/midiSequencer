@@ -23,6 +23,7 @@ public:
 private:
    ofVec2f _start;
    ofVec2f _end;
+   float _len;
 
 };
 
@@ -42,7 +43,7 @@ public:
     ofParameter<int> x;
     ofParameter<int> y;
 
-    vector<vector<ofVec2f>> keypoints; // each key contains 4 ofVec2f points
+    vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
     char name;
     Timespan& timespan;
     string toString();
