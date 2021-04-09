@@ -41,7 +41,7 @@ void HarmonicFieldGraph::setup(){
     length    = timespan.getLength() / timespan.numHfields;
     hfxOrigin = timespan.getStart().x + ( length * (getID() - 1)); // from 0 
     localMin  = hfxOrigin;
-    localMax  = hfxOrigin + length; 
+    localMax  = hfxOrigin + length - getWidth(); 
 
     params.setName(toString());
     params.add(x.set("x", hfxOrigin, localMin, localMax));
@@ -131,3 +131,72 @@ void HarmonicFieldGraph::setID(){
 }
 
 int HarmonicFieldGraph::getID(){ return _id; }
+
+
+//-----------------------------------------------------------------------------
+//
+
+IntervalSegmentManager::ModeIntervalMap 
+IntervalSegmentManager::mintMap = []
+{
+    IntervalSegmentManager::ModeIntervalMap mimap
+        // stores the interval steps needed to create a specific scale or mode
+    {
+        {"major", IntervalSegment(vector<int>{2, 2, 1, 2, 2, 2, 1})},//"M2 M2 m2 M2 M2 M2 m2"
+        {"minor", IntervalSegment(vector<int>{2, 2, 1, 2, 2, 2, 1})},//"M2 m2 M2 M2 m2 M2 M2"
+        {"hminor", IntervalSegment(vector<int>{2, 2, 1, 2, 2, 2, 1})},//"M2 m2 M2 M2 M2 m2 M2"
+        {"dorian", IntervalSegment(vector<int>{2, 1, 2, 2, 2, 1, 2})},//"M2 m2 M2 M2 M2 m2 M2"
+        {"phrygian", IntervalSegment(vector<int>{1, 2, 2, 2, 1, 2, 2})},//"m2 M2 M2 M2 m2 M2 M2"
+        {"lydian", IntervalSegment(vector<int>{2, 2, 2, 1, 2, 2, 1})},//"M2 M2 M2 m2 M2 M2 m2"
+        {"mixolydian", IntervalSegment(vector<int>{2, 2, 1, 2, 2, 1, 2})},//"M2 M2 m2 M2 M2 m2 M2"
+        {"locrian", IntervalSegment(vector<int>{1, 2, 2, 2, 1, 2, 2})},//"m2 M2 M2 M2 m2 M2 M2"
+        {"maj7", IntervalSegment(vector<int>{4, 3, 4})},//"M3 m3 M3"
+        {"D7", IntervalSegment(vector<int>{4, 3, 3})},//"M3 m3 m3"
+        {"6", IntervalSegment(vector<int>{3, 5})},//"m3 P4"
+        {"m6", IntervalSegment(vector<int>{4, 5})},//"M3 P4"
+        {"64", IntervalSegment(vector<int>{5, 4})},//"P4 M3"
+        {"m64", IntervalSegment(vector<int>{5, 3})},//"P4 m3"
+        {"65", IntervalSegment(vector<int>{4, 3, 2})},//"M3 m3 M2"
+        {"m65", IntervalSegment(vector<int>{3, 4, 1})},//"m3 M3 m2"
+        {"54", IntervalSegment(vector<int>{5, 2})},//"P4 M2"
+        {"m54", IntervalSegment(vector<int>{5, 1})},//"P4 m2"
+        {"42", IntervalSegment(vector<int>{2, 3})},//"M2 m3"
+        {"m42", IntervalSegment(vector<int>{1, 4})},//"m2 M3"
+    };
+    return mimap;
+}();
+
+//-----------------------------------------------------------------------------
+
+void NumberedPitch::transpose(int n)
+{
+    val += n;
+}
+
+
+//-----------------------------------------------------------------------------
+
+void PitchSegment::transpose(int n)
+{
+    for(int i = 0; i < pitches.size(); i++){
+        pitches[i].transpose(n);
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+
+MidiPitchContainer::MidiPitchContainer(const PitchClass &root, const IntervalSegment &mode)
+   : _root { root }, _mode { mode } 
+{
+    _minpitch = (int)root- MIDCOFFSET; 
+} 
+
+//-----------------------------------------------------------------------------
+//
+
+void MidiPitchContainer::makePitchClassSegment()
+{
+    
+}
+

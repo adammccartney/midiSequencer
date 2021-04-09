@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include <vector>
+#include <map>
 
 
 class Timespan{
@@ -49,6 +50,7 @@ public:
     string toString();
     void setID();
     int getID();
+    float getWidth() { return _width; }
     
     float hfxOrigin;
     float localMin;
@@ -63,25 +65,110 @@ private:
 
 };
 
+//----------------------------------------------------------------------------
+//
+
 enum class PitchClass {
     c, cs, d, ds, e, f, fs, g, gs, a, as, b
 };
 
-/*
+//----------------------------------------------------------------------------
+//
+
+struct NumberedPitch {
+    // numbered according to midi note values (0, 127) = (C-2, G8)
+    NumberedPitch(int v) : val { v }{}
+    NumberedPitch(); // default constructor
+    int val;
+    void transpose(int n);
+};
+
+
+//-----------------------------------------------------------------------------
+
+struct PitchClassSegment {
+    PitchClassSegment(vector<PitchClass> pc) : pclasses { pc } {}
+    PitchClassSegment(); // default
+    vector<PitchClass> pclasses;
+};
+
+//-----------------------------------------------------------------------------
+
+struct PitchSegment {
+    PitchSegment(vector<NumberedPitch> p) : pitches { p } {}
+    PitchSegment(); // default
+    vector<NumberedPitch> pitches;
+    void transpose(int n); // transpose pitches by n semitones
+};
+
+//-----------------------------------------------------------------------------
+//
+
+//TODO: make this generic so it can be used for floats (microtones) too
+//TODO: test this to make sure it works as expected
+//
+struct IntervalSegment{
+    // construct using an integer list (number of semitones)
+    IntervalSegment(vector<int> v) : intervals { v } {}
+    vector<int> intervals;
+};
+
+class IntervalSegmentManager{
+    
+    using ModeIntervalMap = std::map<string, IntervalSegment>;
+
+public:
+
+    IntervalSegmentManager();
+    IntervalSegment getIntervalSegment(string mode) const;    
+
+private:
+    static ModeIntervalMap mintMap;
+};
+
+//-----------------------------------------------------------------------------
+
+class MidiPitchContainer{
+    // construct using a root note and interval segment
+    MidiPitchContainer(const PitchClass &root, const IntervalSegment &mode);
+
+    MidiPitchContainer get();
+
+    void makePitchClassSegment();
+    void makePitchSegment();
+    PitchClassSegment getPitchClassSegment();
+    PitchSegment getPitchSegment();
+
+private:    
+    PitchClass _root;
+    IntervalSegment _mode;
+    int _minpitch;
+    PitchClassSegment pclasses; // this will hold the info for graphic
+    PitchSegment pitches;       // this holds data for sonic
+    const int MIDCOFFSET = 60;
+};
+
+
+//-----------------------------------------------------------------------------
+//
+
 class HarmonicField{
 
 public:
     HarmonicField();
     ~HarmonicField();
+
     void setup();
     void update();
-    void makescale(vector<float> intervalsegment);
-    vector<float> getintervalsegment(string modename);
+
+    void makeScale(vector<float> intervalsegment);
+    vector<float> getIntervalSegment(string modename);
     
     bool state;
     vector <float> scale;
-    float relpos;
+    vector <int> pitches; // these are going to be midi vals
     float root;
-    string mode; 
+    string mode;
+
 };
-*/
+
