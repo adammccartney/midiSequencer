@@ -30,8 +30,8 @@ HarmonicFieldGraph::HarmonicFieldGraph(char n, Timespan& ts)
 
 HarmonicFieldGraph::~HarmonicFieldGraph(){}
 
-
 //-----------------------------------------------------------------------------
+//
 
 void HarmonicFieldGraph::setup(){
     // use _pos to determine position on timeline 
@@ -70,7 +70,7 @@ void HarmonicFieldGraph::draw(){
     updatePoints();
    
     // draw paths according to points
-    for(size_t i = 0; i < keypoints.size(); i++){
+    for(int i = 0; i < (int)keypoints.size(); i++){
         ofPath npath;
         npath.moveTo(keypoints[i][0]);
         npath.lineTo(keypoints[i][1]);
@@ -78,7 +78,10 @@ void HarmonicFieldGraph::draw(){
         npath.lineTo(keypoints[i][3]);
         npath.close(); 
         // color according to piano keyboard
-        if((i == 1) || (i == 3) || (i == 6) || (i == 8) || (i == 10)){
+        PitchClass x = (PitchClass)i;
+        if((x == PitchClass::cs) || (x == PitchClass::ds) || 
+                (x == PitchClass::fs) || (x == PitchClass::gs) || 
+                (x == PitchClass::as)){
             npath.setStrokeColor(ofColor::black);
             npath.setFillColor(ofColor::black);
             npath.setFilled(true);

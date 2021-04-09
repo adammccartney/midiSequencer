@@ -63,6 +63,10 @@ private:
 
 };
 
+enum class PitchClass {
+    c, cs, d, ds, e, f, fs, g, gs, a, as, b
+};
+
 /*
 class HarmonicField{
 
