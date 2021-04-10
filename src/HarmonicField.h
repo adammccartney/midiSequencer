@@ -5,6 +5,10 @@
 #include <map>
 
 
+//-----------------------------------------------------------------------------
+// Graphics Ćlasses
+//
+
 class Timespan{
    // timespan acts mostly as a reference to the HarmonicFields
 
@@ -66,6 +70,7 @@ private:
 };
 
 //----------------------------------------------------------------------------
+// Pitch and Interval Datatypes 
 //
 
 enum class PitchClass {
@@ -80,7 +85,7 @@ struct NumberedPitch {
     NumberedPitch(int v) : val { v }{}
     NumberedPitch(); // default constructor
     int val;
-    void transpose(int n);
+    void transpose(int n) { val += n; }
 };
 
 
@@ -103,36 +108,36 @@ struct PitchSegment {
 
 //-----------------------------------------------------------------------------
 //
-
 //TODO: make this generic so it can be used for floats (microtones) too
-//TODO: test this to make sure it works as expected
-//
-struct IntervalSegment{
+
+struct IntervalSegment {
     // construct using an integer list (number of semitones)
-    IntervalSegment(vector<int> v) : intervals { v } {}
+    IntervalSegment(vector<int> v) : intervals { v }{}
+    //IntervalSegment(const IntervalSegment& is);
     vector<int> intervals;
 };
 
+enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
+    LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
+    FIVE4, MINFIVE4, FOUR2, DIMFOUR2, MODECOUNT };
+
 class IntervalSegmentManager{
-    
-    using ModeIntervalMap = std::map<string, IntervalSegment>;
 
 public:
-
     IntervalSegmentManager();
-    IntervalSegment getIntervalSegment(string mode) const;    
+    static map <Mode, vector<int>> modeIntervalMap;
 
 private:
-    static ModeIntervalMap mintMap;
+    static void makeMap();
 };
 
 //-----------------------------------------------------------------------------
 
-class MidiPitchContainer{
-    // construct using a root note and interval segment
-    MidiPitchContainer(const PitchClass &root, const IntervalSegment &mode);
+class PitchManager{
+    // Interface class to manage the allocation of pitch data
+    PitchManager(const PitchClass &root, const IntervalSegment &mode);
 
-    MidiPitchContainer get();
+    PitchManager get();
 
     void makePitchClassSegment();
     void makePitchSegment();
@@ -150,6 +155,7 @@ private:
 
 
 //-----------------------------------------------------------------------------
+// Logic class for Quantizer Fields
 //
 
 class HarmonicField{
