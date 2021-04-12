@@ -1,4 +1,5 @@
 #include "PitchManager.h"
+#include <iostream>
 
 //----------------------------------------------------------------------------
 // Pitch and Interval Datatypes 
@@ -34,16 +35,14 @@ void IntervalSegmentManager::makeMap() {
 //-----------------------------------------------------------------------------
 
 void NumberedPitchClass::init(){
-    val = (int)name + MIDCOFFSET;
+    val = (int)name;
 }
 
 //-----------------------------------------------------------------------------
 
-PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
-   : _root { root }, _mode { mode } 
-{
-    _minpitch = (int)root- MIDCOFFSET; 
-} 
+void NumberedPitch::init(){
+    val = (int)name;
+}
 
 //-----------------------------------------------------------------------------
 //
@@ -57,9 +56,58 @@ void PitchSetManager::makePitchClassSet()
     for(int i = 0; i < _mode.intervals.size(); i++){
         // move through intervals
         // increment the value 
-        // append to set  
+        temppc.transpose(_mode.intervals[i]);
+        pcset.push_back(temppc); 
     }
-    
-    
+    //TODO: figure out how this compiles, specifically if both copies persist
+    _pcset = { pcset }; 
+}
+
+
+//-----------------------------------------------------------------------------
+//
+
+void PitchSetManager::makePitchSet()
+{
+    // makes a set of pitches across a span of 10 octaves
+    // retrieve vector of pitch classes and access them in the root octave
+    int offset = 0;
+    int pitchval = 0;
+    for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
+        for(int j = 0; j < _pcset.size() - 1; j++){ // don't duplicate the octave
+            cout << "Octave: " << OCTAVE_OFFSETS[i] << '\t';
+            offset = OCTAVE_OFFSETS[i];
+            pitchval = _pcset[j].asInt() + offset;
+            cout << "Tmp: " << pitchval << " ";
+        }
+        cout << '\n';
+    }
+}
+
+
+//-----------------------------------------------------------------------------
+
+PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
+   : _root { root }, _mode { mode } 
+{
+    _minpitch = (int)root - MIDCOFFSET; 
+    makePitchClassSet();
+    makePitchSet();
+} 
+
+int main()
+{
+   IntervalSegmentManager ism;
+   IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+   PitchSetManager pcman{PitchClass::c, major}; 
+   vector <NumberedPitchClass> testpc { pcman.getPitchClassSet() };
+   for(int i = 0; i < testpc.size(); i++){
+       cout << testpc[i].asInt() << '\t';
+   }
+   vector <NumberedPitch> testpitches { pcman.getPitchSet() };
+   for(int i = 0; i < testpitches.size(); i++){
+       cout << testpitches[i].asInt() << '\t';
+   }
+   return 0;
 }
 

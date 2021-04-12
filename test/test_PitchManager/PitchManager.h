@@ -10,9 +10,10 @@
  * */
 #pragma once
 
-#include "ofMain.h"
 #include <vector>
 #include <map>
+
+using namespace::std;
 
 //----------------------------------------------------------------------------
 // constants
@@ -30,44 +31,64 @@ enum class PitchClass {
 //----------------------------------------------------------------------------
 //
 
-struct NumberedPitchClass {
+class NumberedPitchClass {
+
+public:
     // numbered according to midi note values in the middle c octave (60-72)
     NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
     // compiler makes simple constructor by default
     PitchClass name;
     void init();
-    int val;
-    void transpose(int n) { val += n; }
-};
-
-
-struct NumberedPitch {
-    // numbered according to midi note values (0, 127) = (C-2, G8)
-    NumberedPitch(int v) : val { v }{}
-    // compiler makes simple constructor by default
-    int val;
-    void transpose(int n) { val += n; }
-};
-
-
-//-----------------------------------------------------------------------------
-
-struct PitchClassSet {
-    PitchClassSet(vector<PitchClass> pc) : pclasses { pc } {}
-    PitchClassSet();
-    // compiler makes simple constructor by default
-    vector<PitchClass> pclasses;
-};
-
-//-----------------------------------------------------------------------------
-
-struct PitchSet {
-    PitchSet(vector<NumberedPitch> p) : pitches { p } {}
-    PitchSet();
-    // compiler makes simple constructor by default
     
-    vector<NumberedPitch> pitches;
+    int asInt() { return val; }
+
+    void transpose(int n) { val += n; }
+
+private:
+    int val;
 };
+
+
+//----------------------------------------------------------------------------
+//
+
+class NumberedPitch {
+    
+public:
+    // numbered according to midi note values (0, 127) = (C-2, G8)
+    NumberedPitch(int v) : val { v }{ init(); }
+    // compiler makes simple destructor by default
+    
+    PitchClass name;
+    void init();
+    
+    int asInt() { return val; }
+
+    void transpose(int n) { val += n; }
+
+private:
+    int val;
+};
+
+
+//-----------------------------------------------------------------------------
+
+//struct PitchClassSet {
+//    PitchClassSet(vector<NumberedPitchClass> pc) : pclasses { pc }{}
+//    PitchClassSet();
+//    // compiler makes simple destructor by default
+//    vector<NumberedPitchClass> pclasses;
+//};
+//
+////-----------------------------------------------------------------------------
+//
+//struct PitchSet {
+//    PitchSet(vector<NumberedPitch> p) : pitches { p } {}
+//    PitchSet();
+//    // compiler makes simple constructor by default
+//    
+//    vector<NumberedPitch> pitches;
+//};
 
 //-----------------------------------------------------------------------------
 //
@@ -97,21 +118,24 @@ private:
 //-----------------------------------------------------------------------------
 
 class PitchSetManager{
+
+public:
     // Interface class to manage the subset of relevant steps for quantizer
     PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
 
     void makePitchClassSet();
     void makePitchSet();
 
-    PitchClassSet getPitchClassSet();
-    PitchSet getPitchSet();
+    vector<NumberedPitchClass> getPitchClassSet() { return _pcset; }
+    vector<NumberedPitch> getPitchSet() { return _pitches; }
 
 private:    
     PitchClass _root;
     IntervalSegment _mode;
     int _minpitch;
-    PitchClassSet pclasses; // this will hold the info for graphic
-    PitchSet pitches;       // this holds data for sonic
+    vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
+    vector<NumberedPitch> _pitches;       // this holds data for sonic
+    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108};
 };
 
 
