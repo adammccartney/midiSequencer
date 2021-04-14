@@ -22,3 +22,10 @@ make
 make RunRelease
 ```
 
+# Usage
+
+It's intended to be used as a single component in a modular toolchain. midi
+Sequencer receives notes from a midi port and communicates the generated
+sequencer over OSC to some other program (chuck/supercollider/puredata), 
+which then might do something useful (like make some control messages 
+for an instrument). 
