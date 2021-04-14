@@ -94,6 +94,7 @@ public:
     // compiler makes simple constructor by default
     PitchClass name;
     void init();
+    void transpose(int n) { val += n; }
     
     int asInt() { return val; }
 
