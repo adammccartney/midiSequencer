@@ -16,7 +16,7 @@ a note in.
 
 ```
 cd $OFROOT/apps/myApps/
-git clone https://github.com/admccartney/midiSequencer.git
+git clone git@github.com:adammccartney/midiSequencer.git
 cd midiSequencer 
 make
 make RunRelease
