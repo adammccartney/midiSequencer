@@ -1,1 +1,3 @@
 ofxGui
+ofxMidi
+ofxOsc
