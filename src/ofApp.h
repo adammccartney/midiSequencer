@@ -32,11 +32,11 @@ class ofApp : public ofBaseApp{
         ofParameter<int> hfield3Slider;
         ofParameter<int> hfield4Slider;
 
-        Timespan timespan{4};  // timespan with 4 subsections (harmonic fields)
-        HarmonicFieldGraph hfield1{'a', timespan}; 
-        HarmonicFieldGraph hfield2{'b', timespan};  
-        HarmonicFieldGraph hfield3{'c', timespan};  
-        HarmonicFieldGraph hfield4{'d', timespan};
+        TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
+        HarmonicFieldGraph hfield1{'a', timespangraph}; 
+        HarmonicFieldGraph hfield2{'b', timespangraph};  
+        HarmonicFieldGraph hfield3{'c', timespangraph};  
+        HarmonicFieldGraph hfield4{'d', timespangraph};
         
         const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
         

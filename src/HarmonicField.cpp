@@ -4,8 +4,8 @@
 // Graphics Ćlasses
 //
 
-Timespan::Timespan(const int nhf)
-    : numHfields{nhf}
+TimespanGraph::TimespanGraph(const int numharmonicfields)
+    : numHfields{numharmonicfields}
 {
     _start.x = 0.0;
     _start.y = ofGetHeight() / 2.0;
@@ -14,24 +14,20 @@ Timespan::Timespan(const int nhf)
     _len     = _start.distance(_end);
 }
 
-Timespan::~Timespan(){}
+float TimespanGraph::getLength(){ return _len; }
 
-float Timespan::getLength(){ return _len; }
-
-void Timespan::draw(){
+void TimespanGraph::draw(){
     ofDrawLine(_start.x, _start.y, _end.x, _end.y);
 }
 
 //-----------------------------------------------------------------------------
 // 
 
-HarmonicFieldGraph::HarmonicFieldGraph(char n, Timespan& ts)
+HarmonicFieldGraph::HarmonicFieldGraph(char n, TimespanGraph& ts)
     :name{n}, timespan{ts}
 {
     this->setID();
 }
-
-HarmonicFieldGraph::~HarmonicFieldGraph(){}
 
 //-----------------------------------------------------------------------------
 //
@@ -248,12 +244,18 @@ NumberedPitch HarmonicField::getQuantizedPitch(const NumberedPitch &inpitch){
 
     NumberedPitch n { inpitch.asInt() }; 
     
-    auto p = find(pitchset.begin(), pitchset.end(), n);
-    if(p != pitchset.end()){
+    int max = MIDIMAX;
+    int tmp { 0 };
+    auto p = find(_pitchset.begin(), _pitchset.end(), n);
+    if(p != _pitchset.end()){
         return *p;
     }
     else{
         n.transpose(+1);
+        tmp = n.asInt();
+        if(tmp > max){
+            return -1; //TODO: make this throw an exception
+        }
         return getQuantizedPitch(n);
     }
 }

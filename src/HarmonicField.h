@@ -7,20 +7,22 @@
 //----------------------------------------------------------------------------
 // constants
 
-#define MIDCOFFSET 60;
-#define MIDIMAX 127;
+    
+inline extern const int MIDCOFFSET { 60 };
+inline extern const int MIDIMAX { 127 };
+
 
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
 //
 
-class Timespan{
+class TimespanGraph{
    // timespan acts mostly as a reference to the HarmonicFields
 
 public:
 
-   Timespan(const int nhf);
-   ~Timespan();
+   TimespanGraph(const int numharmonicfields);
+   // compiler generates default destructor
 
    void draw();
 
@@ -34,14 +36,13 @@ private:
    ofVec2f _start;
    ofVec2f _end;
    float _len;
-
 };
 
 class HarmonicFieldGraph{
 
 public:
-    HarmonicFieldGraph(char n, Timespan& ts); 
-    ~HarmonicFieldGraph();
+    HarmonicFieldGraph(char n, TimespanGraph& ts); 
+    // compiler generates default destructor
 
     void setup();
     void draw();
@@ -55,7 +56,7 @@ public:
 
     vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
     char name;
-    Timespan& timespan;
+    TimespanGraph& timespan;
     string toString();
     void setID();
     int getID();
@@ -180,12 +181,12 @@ private:
 class HarmonicField{
 
 public:
-    HarmonicField(vector<NumberedPitch> &pdata) : pitchset { pdata } {}
+    HarmonicField(vector<NumberedPitch> &pdata) : _pitchset { pdata } {}
 
     NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
 
 private:
-    vector<NumberedPitch> pitchset;
+    vector<NumberedPitch> _pitchset;
 
 };
 

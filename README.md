@@ -29,3 +29,17 @@ Sequencer receives notes from a midi port and communicates the generated
 sequencer over OSC to some other program (chuck/supercollider/puredata), 
 which then might do something useful (like make some control messages 
 for an instrument). 
+# Todo
+
+14. April 2021
++ ~~Design behavior model for sender~~
++ Design behavior model for receiver
+
+9. April 2021
++ ~~Create enum pitchclass~~
++ ~~Ammend construction of harmonic field graphs so they don't overlap~~
++ ~~Convert python code into HarmonicField logic class~~
+
+8. April 2021
++ ~~Create a timeline and section it according to the number of harmonic
+  fields~~

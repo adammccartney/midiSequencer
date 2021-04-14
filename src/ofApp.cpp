@@ -19,12 +19,11 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    timespan.draw();
+    timespangraph.draw();
     for(auto i = 0; i < hfgrphs.size(); i++){
         hfgrphs[i]->draw();
     }
     gui.draw();
-
 }
 
 //--------------------------------------------------------------
