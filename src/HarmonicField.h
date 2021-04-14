@@ -184,16 +184,10 @@ class HarmonicField{
 public:
     HarmonicField(vector<NumberedPitch> &pdata) : pitchset { pdata } {}
 
-    //void setup();
-    //void update();
-
-    //int searchPitch(NumberedPitch &inpitch);
-    //int findPitch(const NumberedPitch &inpitch);
     NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
 
 private:
     vector<NumberedPitch> pitchset;
-    //vector<NumberedPitch>::iterator p;
 
 };
 
