@@ -4,6 +4,11 @@
 #include <vector>
 #include <map>
 
+//----------------------------------------------------------------------------
+// constants
+
+#define MIDCOFFSET 60;
+#define MIDIMAX 127;
 
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
@@ -73,37 +78,53 @@ private:
 // Pitch and Interval Datatypes 
 //
 
-enum class PitchClass {
+enum PitchClass {
     c, cs, d, ds, e, f, fs, g, gs, a, as, b
 };
+
+
 
 //----------------------------------------------------------------------------
 //
 
-struct NumberedPitch {
-    // numbered according to midi note values (0, 127) = (C-2, G8)
-    NumberedPitch(int v) : val { v }{}
-    NumberedPitch(); // default constructor
-    int val;
+class NumberedPitchClass {
+
+public:
+    // numbered according to midi note values in the middle c octave (60-72)
+    NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
+    // compiler makes simple constructor by default
+    PitchClass name;
+    void init();
+    
+    int asInt() { return val; }
+
     void transpose(int n) { val += n; }
+
+private:
+    int val;
 };
 
 
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//
 
-struct PitchClassSegment {
-    PitchClassSegment(vector<PitchClass> pc) : pclasses { pc } {}
-    PitchClassSegment(); // default
-    vector<PitchClass> pclasses;
-};
+class NumberedPitch {
+    
+public:
+    // numbered according to midi note values (0, 127) = (C-2, G8)
+    NumberedPitch(int v) : val { v }{ }
+    // compiler makes simple destructor by default
+    
+    void init();
+    
+    int asInt() { return val; }
 
-//-----------------------------------------------------------------------------
+    void transpose(int n) { val += n; }
+    
+    int operator==(NumberedPitch n);
 
-struct PitchSegment {
-    PitchSegment(vector<NumberedPitch> p) : pitches { p } {}
-    PitchSegment(); // default
-    vector<NumberedPitch> pitches;
-    void transpose(int n); // transpose pitches by n semitones
+private:
+    int val;
 };
 
 //-----------------------------------------------------------------------------
@@ -133,26 +154,26 @@ private:
 
 //-----------------------------------------------------------------------------
 
-class PitchManager{
-    // Interface class to manage the allocation of pitch data
-    PitchManager(const PitchClass &root, const IntervalSegment &mode);
+class PitchSetManager{
 
-    PitchManager get();
+public:
+    // Interface class to manage the subset of relevant steps for quantizer
+    PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
 
-    void makePitchClassSegment();
-    void makePitchSegment();
-    PitchClassSegment getPitchClassSegment();
-    PitchSegment getPitchSegment();
+    void makePitchClassSet();
+    void makePitchSet();
+
+    vector<NumberedPitchClass> getPitchClassSet() { return _pcset; }
+    vector<NumberedPitch> getPitchSet() { return _pitches; }
 
 private:    
     PitchClass _root;
     IntervalSegment _mode;
-    int _minpitch;
-    PitchClassSegment pclasses; // this will hold the info for graphic
-    PitchSegment pitches;       // this holds data for sonic
-    const int MIDCOFFSET = 60;
+    int _minpitchval;
+    vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
+    vector<NumberedPitch> _pitches;       // this holds data for sonic
+    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108};
 };
-
 
 //-----------------------------------------------------------------------------
 // Logic class for Quantizer Fields
@@ -161,20 +182,18 @@ private:
 class HarmonicField{
 
 public:
-    HarmonicField();
-    ~HarmonicField();
+    HarmonicField(vector<NumberedPitch> &pdata) : pitchset { pdata } {}
 
-    void setup();
-    void update();
+    //void setup();
+    //void update();
 
-    void makeScale(vector<float> intervalsegment);
-    vector<float> getIntervalSegment(string modename);
-    
-    bool state;
-    vector <float> scale;
-    vector <int> pitches; // these are going to be midi vals
-    float root;
-    string mode;
+    //int searchPitch(NumberedPitch &inpitch);
+    //int findPitch(const NumberedPitch &inpitch);
+    NumberedPitch getQuantizedPitch(NumberedPitch &inpitch);
+
+private:
+    vector<NumberedPitch> pitchset;
+    //vector<NumberedPitch>::iterator p;
 
 };
 
