@@ -117,7 +117,7 @@ public:
     
     void init();
     
-    int asInt() { return val; }
+    int asInt() const { return val; } 
 
     void transpose(int n) { val += n; }
     
@@ -189,7 +189,7 @@ public:
 
     //int searchPitch(NumberedPitch &inpitch);
     //int findPitch(const NumberedPitch &inpitch);
-    NumberedPitch getQuantizedPitch(NumberedPitch &inpitch);
+    NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
 
 private:
     vector<NumberedPitch> pitchset;

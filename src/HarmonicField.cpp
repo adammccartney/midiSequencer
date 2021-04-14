@@ -168,27 +168,94 @@ void IntervalSegmentManager::makeMap() {
 
 //-----------------------------------------------------------------------------
 
-void PitchSegment::transpose(int n)
-{
-    for(int i = 0; i < pitches.size(); i++){
-        pitches[i].transpose(n);
-    }
+void NumberedPitchClass::init(){
+    val = (int)name;
 }
-
 
 //-----------------------------------------------------------------------------
 
-PitchManager::PitchManager(const PitchClass &root, const IntervalSegment &mode)
-   : _root { root }, _mode { mode } 
+
+int NumberedPitch::operator==(NumberedPitch n)
 {
-    _minpitch = (int)root- MIDCOFFSET; 
-} 
+    if(asInt() == n.asInt())
+        return 1;
+    else
+        return 0;
+}
+
 
 //-----------------------------------------------------------------------------
 //
 
-void PitchManager::makePitchClassSegment()
+void PitchSetManager::makePitchClassSet()
+// set of pitch classes from a root and given scale in octave above mid c
 {
-    
+    vector<NumberedPitchClass> pcset;
+    NumberedPitchClass temppc { _root };
+    pcset.push_back(temppc);
+    for(int i = 0; i < _mode.intervals.size(); i++){
+        // move through intervals
+        // increment the value 
+        temppc.transpose(_mode.intervals[i]);
+        pcset.push_back(temppc); 
+    }
+    //TODO: figure out how this compiles, specifically if both copies persist
+    _pcset = { pcset }; 
 }
+
+
+//-----------------------------------------------------------------------------
+//
+
+void PitchSetManager::makePitchSet()
+{
+    // makes a set of pitches across a span of 10 octaves
+    // retrieve vector of pitch classes and access them in the root octave
+    int offset = 0;
+    int pitchval = 0;
+    vector<NumberedPitch> npv;
+    for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
+        for(int j = 0; j < _pcset.size() - 1; j++){ // don't duplicate the octave
+            offset = OCTAVE_OFFSETS[i];
+            pitchval = _pcset[j].asInt() + offset;
+            NumberedPitch np { pitchval };
+            npv.push_back(np);
+        }
+    }
+   _pitches = { npv }; 
+}
+
+
+//-----------------------------------------------------------------------------
+
+PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
+   : _root { root }, _mode { mode } 
+{
+    _minpitchval = (int)root - MIDCOFFSET; 
+    makePitchClassSet();
+    makePitchSet();
+} 
+
+
+//-----------------------------------------------------------------------------
+// 
+
+NumberedPitch HarmonicField::getQuantizedPitch(const NumberedPitch &inpitch){
+    // Tried to find inpitch in this objects pitchset
+    // first makes a new copy of inpitch
+    // tries to find that pitch in pitchset 
+    // if not found it tranposes toward the ceiling and returns recursive call
+
+    NumberedPitch n { inpitch.asInt() }; 
+    
+    auto p = find(pitchset.begin(), pitchset.end(), n);
+    if(p != pitchset.end()){
+        return *p;
+    }
+    else{
+        n.transpose(+1);
+        return getQuantizedPitch(n);
+    }
+}
+
 
