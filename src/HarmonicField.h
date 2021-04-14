@@ -83,22 +83,19 @@ enum PitchClass {
 };
 
 
-
 //----------------------------------------------------------------------------
 //
 
 class NumberedPitchClass {
 
 public:
-    // numbered according to midi note values in the middle c octave (60-72)
+    // simple data class to give some functionalits to PitchClass
     NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
     // compiler makes simple constructor by default
     PitchClass name;
     void init();
     
     int asInt() { return val; }
-
-    void transpose(int n) { val += n; }
 
 private:
     int val;
