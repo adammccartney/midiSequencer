@@ -1,4 +1,5 @@
 #include "HarmonicField.h"
+#include <chrono>
 
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
@@ -232,11 +233,18 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
     makePitchSet();
 } 
 
+//-----------------------------------------------------------------------------
+// Pitch Quantizer Class
+//
+PitchQuantizer::PitchQuantizer(const HarmonicField &hfield)
+    // pitchset is just a reference for the quantizer so it knows what values
+    // to use while processing an incoming pitch
+    : _pitchset { hfield.getPitchSet() }{}
 
 //-----------------------------------------------------------------------------
 // 
 
-NumberedPitch HarmonicField::getQuantizedPitch(const NumberedPitch &inpitch){
+NumberedPitch PitchQuantizer::getQuantizedPitch(const NumberedPitch &inpitch){
     // Tried to find inpitch in this objects pitchset
     // first makes a new copy of inpitch
     // tries to find that pitch in pitchset 

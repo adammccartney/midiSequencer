@@ -181,12 +181,41 @@ private:
 class HarmonicField{
 
 public:
+    // test constructor
     HarmonicField(vector<NumberedPitch> &pdata) : _pitchset { pdata } {}
-
-    NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
+    // constructor should work with a reference to the HarmonicFieldGraph 
+    // 
+    // HarmonicField(const HarmonicFieldGraph &hfgraph); 
+    
+    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
 
 private:
     vector<NumberedPitch> _pitchset;
 
 };
 
+
+//-----------------------------------------------------------------------------
+// Pitch Quantizer 
+class PitchQuantizer{
+
+public:
+    PitchQuantizer(const HarmonicField &hfield);
+    NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
+
+private:
+    const vector<NumberedPitch> _pitchset;
+
+};
+
+//-----------------------------------------------------------------------------
+// Initialization steps for creating a group of quantized notes
+//
+// 1. IntervalSegmentManager ism; // this is a static class
+//
+// 2. IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+// 3. PitchSetManager pcman{PitchClass::c, major}; 
+// 4. HarmonicField hfield{pcman.getPitchSet()};
+// 5. PitchQuantizer pq{hfeld};
+// 6. NumberePitch newpitch = pq.getQuantizedPitch();
+//
