@@ -180,6 +180,15 @@ int NumberedPitch::operator==(NumberedPitch n)
         return 0;
 }
 
+//----------------------------------------------------------------------------
+//
+
+QuantizedPitch::QuantizedPitch(NumberedPitch &np, ofParameterGroup &params)
+    : _pitch { np }, _params { params }
+{
+    //TODO: make sure that params are getting put to good use
+
+}
 
 //-----------------------------------------------------------------------------
 //
@@ -268,4 +277,12 @@ NumberedPitch PitchQuantizer::getQuantizedPitch(const NumberedPitch &inpitch){
     }
 }
 
+
+//-----------------------------------------------------------------------------
+// 
+
+void QuantizedPitchManager::setup(){
+    // for x in harmonicfieldgraphs
+    //   
+}
 

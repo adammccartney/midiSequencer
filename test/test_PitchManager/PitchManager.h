@@ -34,7 +34,7 @@ enum class PitchClass {
 class NumberedPitchClass {
 
 public:
-    // numbered according to midi note values in the middle c octave (60-72)
+    // numbered according to midi note values in the middle c octave (0-11)
     NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
     // compiler makes simple constructor by default
     PitchClass name;

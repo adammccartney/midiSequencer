@@ -117,13 +117,29 @@ public:
     void init();
     
     int asInt() const { return val; } 
-
     void transpose(int n) { val += n; }
     
     int operator==(NumberedPitch n);
 
 private:
     int val;
+};
+
+
+
+
+//----------------------------------------------------------------------------
+//
+
+class QuantizedPitch {
+
+public:
+    QuantizedPitch(NumberedPitch &np, ofParameterGroup &params);
+
+private:
+    NumberedPitch _pitch;
+    ofParameterGroup _params;
+
 };
 
 //-----------------------------------------------------------------------------
@@ -194,9 +210,9 @@ private:
 
 };
 
-
 //-----------------------------------------------------------------------------
 // Pitch Quantizer 
+//
 class PitchQuantizer{
 
 public:
@@ -209,10 +225,25 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Manager for pitch quantizer 
+//
+
+class QuantizedPitchManager{
+    // Listens for incoming midi notes, upon the arrival of a new note, 
+    // runs the draw() function to create 
+public:
+    void setup(); // set up listeners
+    void draw();  // quantize pitches and route to output
+
+private:
+    const vector<PitchQuantizer> _pquantizers;
+
+};
+
+//-----------------------------------------------------------------------------
 // Initialization steps for creating a group of quantized notes
 //
 // 1. IntervalSegmentManager ism; // this is a static class
-//
 // 2. IntervalSegment major{ism.modeIntervalMap[MAJOR]};
 // 3. PitchSetManager pcman{PitchClass::c, major}; 
 // 4. HarmonicField hfield{pcman.getPitchSet()};

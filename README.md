@@ -31,8 +31,11 @@ which then might do something useful (like make some control messages
 for an instrument). 
 # Todo
 
+19. April 2021
++ reformat unit tests to use Google Tests
+
 14. April 2021
-+ ~~Design behavior model for sender~~
++ ~~Design + implement behavior model for sender~~
 + Design behavior model for receiver
 
 9. April 2021
