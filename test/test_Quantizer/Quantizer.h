@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <map>
+#include "gtest/gtest.h"
 
 using namespace::std;
 
