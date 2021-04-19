@@ -1,14 +1,26 @@
-OBJS = testMidiSequencer.cpp
+SHELL=/bin/sh
 
 CC = g++
 CFLAGS = -w -std=c++17
 LIBS = -lgtest -lgmock -lpthread 
 
-OBJ_NAME = testMidiSequencer
+MKDIRP := mkdir -p
+OUTDIR := build
 
-add: $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) -o $(OBJ_NAME) $(LIBS)
+OBJNAME = testMidiSequencer
+OBJS = testMidiSequencer.cpp
 
-.PHONY: clean
+.PHONY: directories all clean
+
+all: directories $(OBJNAME) 
+
+directories: $(OUTDIR)
+
+$(OUTDIR):
+	$(MKDIRP) $(OUTDIR)
+
+$(OBJNAME): $(OBJS)
+	$(CC) $(OBJS) $(CFLAGS) -o $(OUTDIR)/$(OBJNAME) $(LIBS)
+
 clean:
-	rm -f $(OBJ_NAME) error.log
+	rm -rf $(OUTDIR) error.log
