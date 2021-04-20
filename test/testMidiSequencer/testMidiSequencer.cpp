@@ -14,7 +14,9 @@ IntervalSegmentManager::IntervalSegmentManager(){ makeMap(); }
 
 map<Mode, vector<int>> IntervalSegmentManager::modeIntervalMap;
 
-void IntervalSegmentManager::makeMap() { // sum of all interval steps from any root should equal octave
+void IntervalSegmentManager::makeMap() { 
+    // sum of all interval steps from any root should equal octave
+    // that's the same number of sides as a dodecahedron
     modeIntervalMap[MAJOR]=vector<int>{2, 2, 1, 2, 2, 2, 1}; //"M2 M2 m2 M2 M2 M2 m2"
     modeIntervalMap[MINOR]=vector<int>{2, 1, 2, 2, 1, 2, 2};//"M2 m2 M2 M2 m2 M2 M2"
     modeIntervalMap[HMINOR]=vector<int>{2, 1, 2, 2, 1, 3, 1};//"M2 m2 M2 M2 m2 m3 m2"
