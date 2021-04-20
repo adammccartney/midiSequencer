@@ -43,6 +43,7 @@ class NumberedPitchClass {
 public:
     // numbered according to midi note values in the middle c octave (60-72)
     NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
+    NumberedPitchClass();
     // compiler makes simple destructor by default
     PitchClass name;
     void init();
@@ -66,11 +67,12 @@ class NumberedPitch {
 public:
     // numbered according to midi note values (0, 127) = (C-2, G8)
     NumberedPitch(int v) : _val { v }{ }
+    NumberedPitch();
     // compiler makes simple destructor by default
     
     void init();
 
-    void setVal(PitchClass& pc) { _val = int(pc); }
+    void setVal(int p) { _val = p; }
     
     int asInt() { return _val; }
 
@@ -320,4 +322,20 @@ protected:
     IntervalSegment four2{ism.modeIntervalMap[FOUR2]};
     PitchSetManager bfour2{PitchClass::b, four2};
     vector<NumberedPitchClass> bfour2loc {b, cs, e};
+};
+
+
+
+class HarmonicFieldTest : public::testing::Test {
+
+protected:
+    void SetUp() override {} 
+
+    IntervalSegmentManager ism;
+    IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+    PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
+
+    // Create a harmonic field
+    vector<NumberedPitch> npitches { cmajman.getPitchSet() };
+    HarmonicField cmajor { npitches };
 };

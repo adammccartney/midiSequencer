@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 
 using namespace std;
@@ -69,6 +70,14 @@ void NumberedPitchClass::transpose(int n)
 //-----------------------------------------------------------------------------
 //
 
+NumberedPitch::NumberedPitch()
+{
+    _val = 0;
+}
+
+//-----------------------------------------------------------------------------
+//
+
 bool NumberedPitch::operator==(NumberedPitch n)
 {
     if(asInt() == n.asInt())
@@ -87,7 +96,7 @@ void NumberedPitch::transpose(int n)
         _val += n;
     }
     else
-        throw std::invalid_argument("not a valid transposition");
+        throw std::invalid_argument("Invalid transposition");
 }
 
 //-----------------------------------------------------------------------------
@@ -143,21 +152,14 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
 //-----------------------------------------------------------------------------
 
 NumberedPitch HarmonicField::getQuantizedPitch(NumberedPitch &inpitch){
-    cout << "Entering getQP with inpitch: " << inpitch.asInt() << '\n';
     NumberedPitch n { inpitch.asInt() }; // initialize a new pitch
     
-    cout << pitchset.size() << '\n';
-    for(int i = 0; i < pitchset.size(); i++){
-        cout << pitchset[i].asInt() << '\t';
-    }
-    cout << '\n';
     auto p = find(pitchset.begin(), pitchset.end(), n);
     if(p != pitchset.end()){
         return *p;
     }
     else{
         n.transpose(+1);
-        cout << "n as int: " << n.asInt() << '\n';
         return getQuantizedPitch(n);
     }
 }
@@ -663,6 +665,50 @@ TEST_F(PitchManagerTest, PitchSetMadeCorrectly)
     npcvec.clear();
     dist.clear();
 }
+
+TEST_F(HarmonicFieldTest, QuantizesSinglePitch)
+{
+    NumberedPitch cs { 61 };
+    NumberedPitch q1 { cmajor.getQuantizedPitch(cs) };
+    EXPECT_EQ(q1.asInt(), 62);
+    NumberedPitch neg { -10000 };
+    NumberedPitch large { 10000 };
+    NumberedPitch borderlineneg { -1 };
+    NumberedPitch borderlinepos { 128 };
+    try {
+        NumberedPitch q2 { cmajor.getQuantizedPitch(neg) };
+        NumberedPitch q3 { cmajor.getQuantizedPitch(large) };
+        NumberedPitch q4 { cmajor.getQuantizedPitch(borderlineneg) };
+        NumberedPitch q5 { cmajor.getQuantizedPitch(borderlinepos) };
+        FAIL() << "Expected std::invalid_argument";
+    }
+    catch(std::invalid_argument & err) {
+        EXPECT_EQ(err.what(), std::string("Invalid transposition"));
+    }
+    catch(...) {
+        FAIL() << "Expected std::invalid_argument";
+    }
+}
+
+TEST_F(HarmonicFieldTest, DoesNotQuantize)
+// if the value is in field, leave as is
+{
+    NumberedPitch c4 { 70 };
+    NumberedPitch c5 { 72 };
+    NumberedPitch c0 { 0 };
+    NumberedPitch g8 { 127 };
+    vector<NumberedPitch> np { c4, c5, c0, g8 };
+    NumberedPitch q; 
+    vector<NumberedPitch> qp;
+    for(int i = 0; i < np.size(); i++){
+        q.setVal(np[i].asInt());
+        qp.push_back(q);
+    }
+    for(int i = 0; i < qp.size(); i++){
+        EXPECT_EQ(qp[i].asInt(), np[i].asInt());
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 //
