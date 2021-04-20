@@ -14,27 +14,25 @@ IntervalSegmentManager::IntervalSegmentManager(){ makeMap(); }
 
 map<Mode, vector<int>> IntervalSegmentManager::modeIntervalMap;
 
-void IntervalSegmentManager::makeMap() {
+void IntervalSegmentManager::makeMap() { // sum of all interval steps from any root should equal octave
     modeIntervalMap[MAJOR]=vector<int>{2, 2, 1, 2, 2, 2, 1}; //"M2 M2 m2 M2 M2 M2 m2"
     modeIntervalMap[MINOR]=vector<int>{2, 1, 2, 2, 1, 2, 2};//"M2 m2 M2 M2 m2 M2 M2"
-    modeIntervalMap[HMINOR]=vector<int>{2, 1, 2, 2, 1, 3, 1};//"M2 m2 M2 M2 M2 m2 M2"
+    modeIntervalMap[HMINOR]=vector<int>{2, 1, 2, 2, 1, 3, 1};//"M2 m2 M2 M2 m2 m3 m2"
     modeIntervalMap[DORIAN]=vector<int>{2, 1, 2, 2, 2, 1, 2};//"M2 m2 M2 M2 M2 m2 M2"
     modeIntervalMap[PHRYGIAN]=vector<int>{1, 2, 2, 2, 1, 2, 2};//"m2 M2 M2 M2 m2 M2 M2"
     modeIntervalMap[LYDIAN]=vector<int>{2, 2, 2, 1, 2, 2, 1};//"M2 M2 M2 m2 M2 M2 m2"
     modeIntervalMap[MIXOLYDIAN]=vector<int>{2, 2, 1, 2, 2, 1, 2};//"M2 M2 m2 M2 M2 m2 M2"
     modeIntervalMap[LOCRIAN]=vector<int>{1, 2, 2, 1, 2, 2, 2};//"m2 M2 M2 M2 m2 M2 M2"
-    modeIntervalMap[MAJ7]=vector<int>{4, 3, 4};//"M3 m3 M3"
-    modeIntervalMap[DOM7]=vector<int>{4, 3, 3};//"M3 m3 m3"
-    modeIntervalMap[MAJ6]=vector<int>{3, 5};//"m3 P4"
-    modeIntervalMap[MIN6]=vector<int>{4, 5};//"M3 P4"
-    modeIntervalMap[SIX4]=vector<int>{5, 4};//"P4 M3"
-    modeIntervalMap[MINSIX4]=vector<int>{5, 3};//"P4 m3"
-    modeIntervalMap[SIX5]=vector<int>{4, 3, 2};//"M3 m3 M2"
-    modeIntervalMap[MINSIX5]=vector<int>{3, 4, 1};//"m3 M3 m2"
-    modeIntervalMap[FIVE4]=vector<int>{5, 2};//"P4 M2"
-    modeIntervalMap[MINFIVE4]=vector<int>{5, 1};//"P4 m2"
-    modeIntervalMap[FOUR2]=vector<int>{2, 3};//"M2 m3"
-    modeIntervalMap[DIMFOUR2]=vector<int>{1, 4};//"m2 M3"
+    modeIntervalMap[MAJ7]=vector<int>{4, 3, 4, 1};//"M3 m3 M3"
+    modeIntervalMap[DOM7]=vector<int>{4, 3, 3, 2};//"M3 m3 m3"
+    modeIntervalMap[MAJ6]=vector<int>{4, 5, 3};//"M3 P4 m3"
+    modeIntervalMap[MIN6]=vector<int>{3, 6, 3};//"m3 P4 m3"
+    modeIntervalMap[SIX4]=vector<int>{5, 4, 3};//"P4 M3 m3"
+    modeIntervalMap[MINSIX4]=vector<int>{5, 3, 4};//"P4 m3 M3"
+    modeIntervalMap[SIX5]=vector<int>{3, 3, 2, 4};//"m3 m3 M2 M3"
+    modeIntervalMap[MINSIX5]=vector<int>{4, 3, 2, 3};//"M3 m3 M2 M3"
+    modeIntervalMap[FIVE4]=vector<int>{5, 2, 5};//"P4 M2"
+    modeIntervalMap[FOUR2]=vector<int>{2, 3, 7};//"M2 m3"
 }
 
 //-----------------------------------------------------------------------------
@@ -98,8 +96,8 @@ void PitchSetManager::makePitchClassSet()
 {
     vector<NumberedPitchClass> pcset;
     NumberedPitchClass temppc { _root };
-    pcset.push_back(temppc);
-    for(int i = 0; i < _mode.intervals.size(); i++){
+    pcset.push_back(temppc); // append root first  
+    for(int i = 0; i < _mode.intervals.size() - 1; i++){ // don't take last step 
         // move through intervals
         // increment the value 
         temppc.transpose(_mode.intervals[i]);
@@ -121,7 +119,7 @@ void PitchSetManager::makePitchSet()
     int pitchval = 0;
     vector<NumberedPitch> npv;
     for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
-        for(int j = 0; j < _pcset.size() - 1; j++){ // don't duplicate the octave
+        for(int j = 0; j < _pcset.size(); j++){ // don't duplicate the octave
             offset = OCTAVE_OFFSETS[i];
             pitchval = _pcset[j].asInt() + offset;
             NumberedPitch np { pitchval };
@@ -137,7 +135,7 @@ void PitchSetManager::makePitchSet()
 PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
    : _root { root }, _mode { mode } 
 {
-    _minpitchval = (int)root - MIDCOFFSET; 
+    _minpitchval = (int)root; 
     makePitchClassSet();
     makePitchSet();
 } 
@@ -234,7 +232,7 @@ TEST_F(NumberedPitchClassTest, TransposesCorrectly){
 
 
 TEST_F(NumberedPitchTest, OperatorWorksCorrectly){
-    ASSERT_NE(np4==(NumberedPitch(64)), 1);
+    ASSERT_NE(np4==(NumberedPitch(64)), true);
 }
 
 TEST_F(NumberedPitchTest, TransposesCorrectly){
@@ -271,97 +269,401 @@ TEST_F(IntervalSegmentTest, IntervalSegmentsContainRightNumSteps)
     n = locrian.intervals.size();
     EXPECT_EQ(n, 7);
     n = maj7.intervals.size();
-    EXPECT_EQ(n, 3);
+    EXPECT_EQ(n, 4);
     n = dom7.intervals.size();
-    EXPECT_EQ(n, 3);
+    EXPECT_EQ(n, 4);
     n = maj6.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
     n = min6.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
     n = six4.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
     n = minsix4.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
     n = six5.intervals.size();
-    EXPECT_EQ(n, 3);
-    n = minsix5.intervals.size();
-    EXPECT_EQ(n, 3);
+    EXPECT_EQ(n, 4);
     n = five4.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
     n = four2.intervals.size();
-    EXPECT_EQ(n, 2);
-    n = dimfour2.intervals.size();
-    EXPECT_EQ(n, 2);
+    EXPECT_EQ(n, 3);
+}
+
+TEST_F(PitchManagerTest, AllIntervalsSumToOctave)
+{
+    // tests that all interval steps within a constructed PitchSet equal 12
+    const int octave = 12;
+    int sum;
+    for(int modeInt = MAJOR; modeInt != MODECOUNT; modeInt++){
+        sum = 0;
+        IntervalSegmentManager ism;
+        Mode mode = static_cast<Mode>(modeInt);
+        IntervalSegment is{ism.modeIntervalMap[mode]};
+        for(int i = 0; i < is.intervals.size(); i++){ 
+                 sum += is.intervals[i];
+        }
+        EXPECT_EQ(sum, octave);
+    }
 }
 
 TEST_F(PitchManagerTest, PitchClassSetMadeCorrectly)
 {
-    NumberedPitchClass c {PitchClass::c};
-    NumberedPitchClass cs {PitchClass::cs};
-    NumberedPitchClass d {PitchClass::d};
-    NumberedPitchClass ds {PitchClass::ds};
-    NumberedPitchClass e {PitchClass::e};
-    NumberedPitchClass f {PitchClass::f};
-    NumberedPitchClass fs {PitchClass::fs};
-    NumberedPitchClass g {PitchClass::g};
-    NumberedPitchClass gs {PitchClass::gs};
-    NumberedPitchClass a {PitchClass::a};
-    NumberedPitchClass as {PitchClass::as};
-    NumberedPitchClass b {PitchClass::b};
-    
-    vector<NumberedPitchClass> cmajor {c, d, e, f, g, a, b};
     vector<NumberedPitchClass> cionianconstr { cionian.getPitchClassSet() };
-    ASSERT_NE(cionianconstr.size()==cmajor.size(), 1);
-    for(int i = 0; i < cmajor.size(); i++){
-        EXPECT_EQ(cionianconstr[i].asInt(), cmajor[i].asInt());
+    EXPECT_EQ(cionianconstr.size(), cmajorloc.size());
+    for(int i = 0; i < cmajorloc.size(); i++){
+        EXPECT_EQ(cionianconstr[i].asInt(), cmajorloc[i].asInt());
     }  
    
-    vector<NumberedPitchClass> cshmin {cs, ds, e, fs, gs, a, c};
     vector<NumberedPitchClass> cshminconstr { cshminor.getPitchClassSet() }; 
-    ASSERT_NE(cshminconstr.size()==cshmin.size(), 1);
-    for(int i = 0; i < cshmin.size(); i++){
-        EXPECT_EQ(cshminconstr[i].asInt(), cshmin[i].asInt());
+    EXPECT_EQ(cshminconstr.size(), cshminorloc.size());
+    for(int i = 0; i < cshminorloc.size(); i++){
+        EXPECT_EQ(cshminconstr[i].asInt(), cshminorloc[i].asInt());
     }  
 
-    vector<NumberedPitchClass> dminor {d, e, f, g, a, as, c};
     vector<NumberedPitchClass> daeolianconstr { daeolian.getPitchClassSet() };
-    ASSERT_NE(daeolianconstr.size()==dminor.size(), 1);
-    for(int i = 0; i < dminor.size(); i++){
-        EXPECT_EQ(daeolianconstr[i].asInt(), dminor[i].asInt());
+    EXPECT_EQ(daeolianconstr.size(), dminorloc.size());
+    for(int i = 0; i < dminorloc.size(); i++){
+        EXPECT_EQ(daeolianconstr[i].asInt(), dminorloc[i].asInt());
     }  
     
-    vector<NumberedPitchClass> ddorloc {d, e, f, g, a, b, c};
     vector<NumberedPitchClass> ddorianconstr { ddorian.getPitchClassSet() };
-    ASSERT_NE(ddorianconstr.size()==ddorloc.size(), 1);
+    EXPECT_EQ(ddorianconstr.size(), ddorloc.size());
     for(int i = 0; i < ddorloc.size(); i++){
         EXPECT_EQ(ddorianconstr[i].asInt(), ddorloc[i].asInt());
     }  
     
-    vector<NumberedPitchClass> dsphryloc {ds, e, fs, gs, as, b, cs};
     vector<NumberedPitchClass> dsphrygconstr { dsphrygian.getPitchClassSet() };
-    ASSERT_NE(dsphrygconstr.size()==dsphryloc.size(), 1);
+    EXPECT_EQ(dsphrygconstr.size(), dsphryloc.size());
     for(int i = 0; i < dsphryloc.size(); i++){
         EXPECT_EQ(dsphrygconstr[i].asInt(), dsphryloc[i].asInt());
     }  
     
-    vector<NumberedPitchClass> elydianloc {e, fs, gs, as, b, cs, ds};
     vector<NumberedPitchClass> elydianconstr { elydian.getPitchClassSet() };
-    ASSERT_NE(elydianconstr.size()==elydianloc.size(), 1);
+    EXPECT_EQ(elydianconstr.size(), elydianloc.size());
     for(int i = 0; i < elydianloc.size(); i++){
         EXPECT_EQ(elydianconstr[i].asInt(), elydianloc[i].asInt());
     }  
-    vector<NumberedPitchClass> emixolydianloc {e, fs, gs, a, b, cs, d};
     vector<NumberedPitchClass> emixolydianconstr { emixolydian.getPitchClassSet() };
-    ASSERT_NE(emixolydianconstr.size()==emixolydianloc.size(), 1);
+    EXPECT_EQ(emixolydianconstr.size(), emixolydianloc.size());
     for(int i = 0; i < emixolydianloc.size(); i++){
         EXPECT_EQ(emixolydianconstr[i].asInt(), emixolydianloc[i].asInt());
     }  
-    vector<NumberedPitchClass> flocrianloc {f, fs, gs, as, b, cs, ds};
     vector<NumberedPitchClass> flocrianconstr { flocrian.getPitchClassSet() };
-    ASSERT_NE(flocrianconstr.size()==flocrianloc.size(), 1);
+    EXPECT_EQ(flocrianconstr.size(), flocrianloc.size());
     for(int i = 0; i < flocrianloc.size(); i++){
         EXPECT_EQ(flocrianconstr[i].asInt(), flocrianloc[i].asInt());
     }  
+    vector<NumberedPitchClass> fsmaj7constr { fsmaj7.getPitchClassSet() };
+    EXPECT_EQ(fsmaj7constr.size(), fsmaj7loc.size());
+    for(int i = 0; i < fsmaj7loc.size(); i++){
+        EXPECT_EQ(fsmaj7constr[i].asInt(), fsmaj7loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> fsdom7constr { fsdom7.getPitchClassSet() };
+    EXPECT_EQ(fsdom7constr.size(), fsdom7loc.size());
+    for(int i = 0; i < fsdom7loc.size(); i++){
+        EXPECT_EQ(fsdom7constr[i].asInt(), fsdom7loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> gmaj6constr { gmaj6.getPitchClassSet() };
+    EXPECT_EQ(gmaj6constr.size(), gmaj6loc.size());
+    for(int i = 0; i < gmaj6loc.size(); i++){
+        EXPECT_EQ(gmaj6constr[i].asInt(), gmaj6loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> gmin6constr { gmin6.getPitchClassSet() };
+    EXPECT_EQ(gmin6constr.size(), gmin6loc.size());
+    for(int i = 0; i < gmin6loc.size(); i++){
+        EXPECT_EQ(gmin6constr[i].asInt(), gmin6loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> gsix4constr { gsix4.getPitchClassSet() };
+    EXPECT_EQ(gsix4constr.size(), gsix4loc.size());
+    for(int i = 0; i < gsix4loc.size(); i++){
+        EXPECT_EQ(gsix4constr[i].asInt(), gsix4loc[i].asInt());
+    }
+    vector<NumberedPitchClass> gsminsix4constr { gsminsix4.getPitchClassSet() };
+    EXPECT_EQ(gsminsix4constr.size(), gsminsix4loc.size());
+    for(int i = 0; i < gsminsix4loc.size(); i++){
+        EXPECT_EQ(gsminsix4constr[i].asInt(), gsminsix4loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> asix5constr { asix5.getPitchClassSet() };
+    EXPECT_EQ(asix5constr.size(), asix5loc.size());
+    for(int i = 0; i < asix5loc.size(); i++){
+        EXPECT_EQ(asix5constr[i].asInt(), asix5loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> aminsix5constr { aminsix5.getPitchClassSet() };
+    EXPECT_EQ(aminsix5constr.size(), aminsix5loc.size());
+    for(int i = 0; i < aminsix5loc.size(); i++){
+        EXPECT_EQ(aminsix5constr[i].asInt(), aminsix5loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> asfive4constr { asfive4.getPitchClassSet() };
+    EXPECT_EQ(asfive4constr.size(), asfive4loc.size());
+    for(int i = 0; i < asfive4loc.size(); i++){
+        EXPECT_EQ(asfive4constr[i].asInt(), asfive4loc[i].asInt());
+    }  
+    vector<NumberedPitchClass> bfour2constr { bfour2.getPitchClassSet() };
+    EXPECT_EQ(bfour2constr.size(), bfour2loc.size());
+    for(int i = 0; i < bfour2loc.size(); i++){
+        EXPECT_EQ(bfour2constr[i].asInt(), bfour2loc[i].asInt());
+    }  
+}
+
+TEST_F(PitchManagerTest, PitchSetMadeCorrectly)
+{
+    // tests that the octave distribution works
+
+    npcvec = cmajorloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { cionian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = cshminorloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { cshminor.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = dminorloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { daeolian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+
+    npcvec = dsphryloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { dsphrygian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = elydianloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { elydian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = emixolydianloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { emixolydian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+
+    npcvec = flocrianloc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { flocrian.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = fsmaj7loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { fsmaj7.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = fsdom7loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { fsdom7.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = gmaj6loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { gmaj6.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = gmin6loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { gmin6.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = gsix4loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { gsix4.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = gsminsix4loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { gsminsix4.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = asix5loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { asix5.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+    
+    npcvec = aminsix5loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { aminsix5.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+ 
+    npcvec = asfive4loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { asfive4.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
+
+    npcvec = bfour2loc;
+    for(int i = 0; i < numoctaves; i++){
+        for(int j = 0; j < npcvec.size(); j++){
+            pitchval = npcvec[j].asInt() + (i * octavest); 
+            NumberedPitch np{pitchval};
+            dist.push_back(np);
+        }
+    } 
+    for(int i = 0; i < dist.size(); i++){
+        vector<NumberedPitch> npv { bfour2.getPitchSet() };
+        EXPECT_EQ(dist[i].asInt(), npv[i].asInt()); 
+    }
+    npcvec.clear();
+    dist.clear();
 }
 
 //-----------------------------------------------------------------------------

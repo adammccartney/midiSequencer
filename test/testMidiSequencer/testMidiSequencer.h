@@ -97,7 +97,7 @@ struct IntervalSegment {
 
 enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
     LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
-    FIVE4, MINFIVE4, FOUR2, DIMFOUR2, MODECOUNT };
+    FIVE4, FOUR2, MODECOUNT };
 
 class IntervalSegmentManager{
 
@@ -154,6 +154,11 @@ private:
 
 };
 
+
+//-----------------------------------------------------------------------------
+// Unit Tests 
+//
+
 class NumberedPitchClassTest : public::testing::Test {
 
 protected:
@@ -195,9 +200,6 @@ protected:
     void SetUp() override {}
 
     // void TearDown() override {}
-    //
-
-
 
     IntervalSegmentManager ism;
     IntervalSegment major{ism.modeIntervalMap[MAJOR]}; 
@@ -217,9 +219,7 @@ protected:
     IntervalSegment six5{ism.modeIntervalMap[SIX5]}; 
     IntervalSegment minsix5{ism.modeIntervalMap[MINSIX5]}; 
     IntervalSegment five4{ism.modeIntervalMap[FIVE4]}; 
-    IntervalSegment minfive4{ism.modeIntervalMap[MINFIVE4]}; 
     IntervalSegment four2{ism.modeIntervalMap[FOUR2]}; 
-    IntervalSegment dimfour2{ism.modeIntervalMap[DIMFOUR2]}; 
 };
 
 
@@ -228,30 +228,96 @@ class PitchManagerTest : public::testing::Test {
 protected:
     void SetUp() override {} 
 
+    const int octavest = 12;
+    vector<NumberedPitchClass> npcvec;
+    vector<NumberedPitch> dist;
+    const int numoctaves = 2;
+    int pitchval {0};
+ 
+    NumberedPitchClass c {PitchClass::c};
+    NumberedPitchClass cs {PitchClass::cs};
+    NumberedPitchClass d {PitchClass::d};
+    NumberedPitchClass ds {PitchClass::ds};
+    NumberedPitchClass e {PitchClass::e};
+    NumberedPitchClass f {PitchClass::f};
+    NumberedPitchClass fs {PitchClass::fs};
+    NumberedPitchClass g {PitchClass::g};
+    NumberedPitchClass gs {PitchClass::gs};
+    NumberedPitchClass a {PitchClass::a};
+    NumberedPitchClass as {PitchClass::as};
+    NumberedPitchClass b {PitchClass::b};
+    
     IntervalSegmentManager ism;
 
     IntervalSegment major{ism.modeIntervalMap[MAJOR]}; 
     PitchSetManager cionian{PitchClass::c, major};
+    vector<NumberedPitchClass> cmajorloc {c, d, e, f, g, a, b}; // used locally
 
     IntervalSegment hminor{ism.modeIntervalMap[HMINOR]};
     PitchSetManager cshminor{PitchClass::cs, hminor};
+    vector<NumberedPitchClass> cshminorloc {cs, ds, e, fs, gs, a, c};
 
     IntervalSegment minor{ism.modeIntervalMap[MINOR]}; 
     PitchSetManager daeolian{PitchClass::d, minor};
+    vector<NumberedPitchClass> dminorloc {d, e, f, g, a, as, c};
 
     IntervalSegment dorian{ism.modeIntervalMap[DORIAN]};
     PitchSetManager ddorian{PitchClass::d, dorian};
+    vector<NumberedPitchClass> ddorloc {d, e, f, g, a, b, c};
 
     IntervalSegment phrygian{ism.modeIntervalMap[PHRYGIAN]};
     PitchSetManager dsphrygian{PitchClass::ds, phrygian};
+    vector<NumberedPitchClass> dsphryloc {ds, e, fs, gs, as, b, cs};
 
     IntervalSegment lydian{ism.modeIntervalMap[LYDIAN]};
     PitchSetManager elydian{PitchClass::e, lydian};
+    vector<NumberedPitchClass> elydianloc {e, fs, gs, as, b, cs, ds};
     
     IntervalSegment mixolydian{ism.modeIntervalMap[MIXOLYDIAN]};
     PitchSetManager emixolydian{PitchClass::e, mixolydian};
+    vector<NumberedPitchClass> emixolydianloc {e, fs, gs, a, b, cs, d};
 
     IntervalSegment locrian{ism.modeIntervalMap[LOCRIAN]};
     PitchSetManager flocrian{PitchClass::f, locrian};
+    vector<NumberedPitchClass> flocrianloc {f, fs, gs, as, b, cs, ds};
 
+    IntervalSegment maj7{ism.modeIntervalMap[MAJ7]};
+    PitchSetManager fsmaj7{PitchClass::fs, maj7};
+    vector<NumberedPitchClass> fsmaj7loc {fs, as, cs, f};
+
+    IntervalSegment dom7{ism.modeIntervalMap[DOM7]};
+    PitchSetManager fsdom7{PitchClass::fs, dom7};
+    vector<NumberedPitchClass> fsdom7loc {fs, as, cs, e};
+
+    IntervalSegment maj6{ism.modeIntervalMap[MAJ6]};
+    PitchSetManager gmaj6{PitchClass::g, maj6};
+    vector<NumberedPitchClass> gmaj6loc {g, b, e};
+    
+    IntervalSegment min6{ism.modeIntervalMap[MIN6]};
+    PitchSetManager gmin6{PitchClass::g, min6};
+    vector<NumberedPitchClass> gmin6loc {g, as, e};
+
+    IntervalSegment six4{ism.modeIntervalMap[SIX4]};
+    PitchSetManager gsix4{PitchClass::g, six4};
+    vector<NumberedPitchClass> gsix4loc {g, c, e};
+
+    IntervalSegment minsix4{ism.modeIntervalMap[MINSIX4]};
+    PitchSetManager gsminsix4{PitchClass::gs, minsix4};
+    vector<NumberedPitchClass> gsminsix4loc {gs, cs, e};
+
+    IntervalSegment six5{ism.modeIntervalMap[SIX5]};
+    PitchSetManager asix5{PitchClass::a, six5};
+    vector<NumberedPitchClass> asix5loc {a, c, ds, f};
+
+    IntervalSegment minsix5{ism.modeIntervalMap[MINSIX5]};
+    PitchSetManager aminsix5{PitchClass::a, six5};
+    vector<NumberedPitchClass> aminsix5loc {a, c, ds, f};
+
+    IntervalSegment five4{ism.modeIntervalMap[FIVE4]};
+    PitchSetManager asfive4{PitchClass::as, five4};
+    vector<NumberedPitchClass> asfive4loc {as, ds, f};
+
+    IntervalSegment four2{ism.modeIntervalMap[FOUR2]};
+    PitchSetManager bfour2{PitchClass::b, four2};
+    vector<NumberedPitchClass> bfour2loc {b, cs, e};
 };
