@@ -31,12 +31,20 @@ which then might do something useful (like make some control messages
 for an instrument). 
 # Todo
 
+20. April 2021
++ get gui to talk to logic structure for segments (selecting harmonies)
++ finish design of HarmonicFieldManager and QuantizedPitchManager, implement
++ figure out relationships needed to connect up 
+  - HarmonicField | HarmonicFieldManager QuantizedPitchManager | OscMessage
++ fire a tracer bullet and check that you haven't just built a pile of pooh
+
 19. April 2021
-+ reformat unit tests to use Google Tests
++ ~~reformat unit tests to use Google Tests~~ (turns out a giant corporation
+  does at least one thing right)
 
 14. April 2021
 + ~~Design + implement behavior model for sender~~
-+ Design behavior model for receiver
++ ~~Design behavior model for receiver~~
 
 9. April 2021
 + ~~Create enum pitchclass~~
