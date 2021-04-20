@@ -62,7 +62,7 @@ void NumberedPitchClass::transpose(int n)
     }
     else
         for(int i = 0; i < n; i++) ++name;
-    setVal(name); // resets the integer value 
+    setVal(name); 
 }
 //-----------------------------------------------------------------------------
 //
@@ -80,7 +80,7 @@ bool NumberedPitch::operator==(NumberedPitch n)
 
 void NumberedPitch::transpose(int n)
 {
-    // don't go process requests to go below "midi=0" or above "midi=127"
+    // do not process requests below "midi=0" or above "midi=127"
     if(((_val + n) > 0) && (n < MIDIMAX)){ // the request is in range
         _val += n;
     }
@@ -92,14 +92,12 @@ void NumberedPitch::transpose(int n)
 //
 
 void PitchSetManager::makePitchClassSet()
-// set of pitch classes from a root and given scale in octave above mid c
+// makes a set of pitch classes using the members root and interval segment 
 {
     vector<NumberedPitchClass> pcset;
     NumberedPitchClass temppc { _root };
     pcset.push_back(temppc); // append root first  
     for(int i = 0; i < _mode.intervals.size() - 1; i++){ // don't take last step 
-        // move through intervals
-        // increment the value 
         temppc.transpose(_mode.intervals[i]);
         pcset.push_back(temppc); 
     }
@@ -112,14 +110,13 @@ void PitchSetManager::makePitchClassSet()
 //
 
 void PitchSetManager::makePitchSet()
+// makes a set of pitches across a span of 10 octaves using the member pitchset
 {
-    // makes a set of pitches across a span of 10 octaves
-    // retrieve vector of pitch classes and access them in the root octave
     int offset = 0;
     int pitchval = 0;
     vector<NumberedPitch> npv;
     for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
-        for(int j = 0; j < _pcset.size(); j++){ // don't duplicate the octave
+        for(int j = 0; j < _pcset.size(); j++){ 
             offset = OCTAVE_OFFSETS[i];
             pitchval = _pcset[j].asInt() + offset;
             NumberedPitch np { pitchval };
@@ -142,7 +139,6 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
 
 
 //-----------------------------------------------------------------------------
-// TODO: fix bug in pitchdata.getPitchSet() ... write a unit test!
 
 NumberedPitch HarmonicField::getQuantizedPitch(NumberedPitch &inpitch){
     cout << "Entering getQP with inpitch: " << inpitch.asInt() << '\n';
