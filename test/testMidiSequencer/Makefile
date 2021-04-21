@@ -1,7 +1,8 @@
 SHELL=/bin/sh
 
 CC = g++
-CFLAGS = -w -std=c++17
+
+CFLAGS = -w -std=c++17 
 LIBS = -lgtest -lgmock -lpthread 
 
 MKDIRP := mkdir -p
@@ -20,7 +21,7 @@ $(OUTDIR):
 	$(MKDIRP) $(OUTDIR)
 
 $(OBJNAME): $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) -o $(OUTDIR)/$(OBJNAME) $(LIBS)
+	$(CC) $(OBJS) $(CFLAGS) -o $(OUTDIR)/$(OBJNAME) $(LDFLAGS) $(LIBS)
 
 clean:
 	rm -rf $(OUTDIR) error.log

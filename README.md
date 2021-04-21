@@ -33,6 +33,7 @@ for an instrument).
 
 20. April 2021
 + integrate unit tests
++ normalize x y position on gui
 + get gui to talk to logic structure for segments (selecting harmonies)
 + finish design of HarmonicFieldManager and QuantizedPitchManager, implement
 + figure out relationships needed to connect up 

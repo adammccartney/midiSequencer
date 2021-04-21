@@ -10,10 +10,6 @@
  */
 
 #pragma once
-
-#include "ofMain.h"
-#include "ofxOscMessage.h"
-#include "ofxMidiIn.h"
 #include <vector>
 #include <map>
 #include "gtest/gtest.h"
@@ -27,6 +23,74 @@ inline extern const int MIDCOFFSET { 60 };
 inline extern const int MIDIMAX { 127 };
 
 //-----------------------------------------------------------------------------
+// Mock of functions for testing
+// N.B: The graphics classes are only here to model some behavior, it's not
+// practical to wrap the whole openFrameworks application into this testing
+// framework, so graphics classes are modelled here locally, the actual
+// versions leverages openFrameworks and all of it's nicely contstructed types
+// and functions
+
+inline extern const int numberHFields { 4 };
+inline extern const int LENGTH { 240 };
+inline extern int ofGetHeight() { return 120; }
+inline extern int ofGetWidth() { return 240; }
+
+// Constants to model incoming parameters from the GUI
+inline extern int xpos1 { LENGTH / 2 };
+inline extern int ypos1 { LENGTH / 2 };
+inline extern int xpos2 { LENGTH / 4 };
+inline extern int ypos2 { LENGTH / 4 };
+inline extern int xpos3 { LENGTH / 6 };
+inline extern int ypos3 { LENGTH / 6 };
+inline extern int xpos4 { LENGTH / 8 };
+inline extern int ypos4 { LENGTH / 8 };
+
+// Mock ofVec2f class that mimics the same in OpenFrameworks app
+template<typename T>
+class ofVec2f{
+    public:
+    ofVec2f();
+    ofVec2f(T x, T y);
+    string toString();
+    void setX(T x);
+    void setY(T y);
+    T getX() { return _x;  } 
+    T getY() { return _y;  }
+    
+    protected:
+    T _x;
+    T _y;
+};
+
+template<typename T>
+inline ofVec2f<T>::ofVec2f(T x, T y)
+{
+    _x = x;
+    _y = y;
+}
+
+template<typename T>
+inline ofVec2f<T>::ofVec2f(){}
+
+template<typename T>
+inline string ofVec2f<T>::toString()
+{
+    return "x: " + to_string(_x) + " y: " + to_string(_y);
+}
+
+template<typename T>
+inline void ofVec2f<T>::setX(T x)
+{
+    _x = x;
+}
+
+template<typename T>
+inline void ofVec2f<T>::setY(T y)
+{
+    _y = y;
+}
+
+//-----------------------------------------------------------------------------
 // Graphics Ćlasses
 //
 
@@ -38,17 +102,17 @@ public:
    TimespanGraph(const int numharmonicfields);
    // compiler generates default destructor
 
-   void draw();
+   //void draw();
 
    float getLength();
-   ofVec2f getStart() { return _start; }
-   ofVec2f getEnd() { return _end; }
+   ofVec2f<float> getStart() { return _start; }
+   ofVec2f<float> getEnd() { return _end; }
 
    const int numHfields;
 
 private:
-   ofVec2f _start;
-   ofVec2f _end;
+   ofVec2f<float> _start;
+   ofVec2f<float> _end;
    float _len;
 };
 
@@ -58,23 +122,29 @@ public:
     HarmonicFieldGraph(char n, TimespanGraph& ts); 
     // compiler generates default destructor
 
-    void setup();
-    void draw();
-    void update();
+    //void setup();
+    //void draw();
+    //void update();
 
-    void updatePoints();
+    //void updatePoints();
 
-    ofParameterGroup params;
-    ofParameter<int> x;
-    ofParameter<int> y;
+    //ofParameterGroup params;
+    //ofParameter<int> x;
+    //ofParameter<int> y;
+    int x;
+    int y;
 
-    vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
+    //vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
     char name;
     TimespanGraph& timespan;
     string toString();
     void setID();
     int getID();
     float getWidth() { return _width; }
+
+    void setPos(float _x, float _y) { x = _x; y = _y; } 
+    float getXPos() { return x; } 
+    float getYPos() { return y; }
     
     float hfxOrigin;
     float localMin;
@@ -213,9 +283,29 @@ public:
 
     //void setup(); // intialize on opening app, listen to gui
     //void draw();  // update according to changes from gui 
+    
+    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
 
 private:
     vector<NumberedPitch> _pitchset;
+
+};
+
+//-----------------------------------------------------------------------------
+// Note
+
+class Note{
+
+public:
+    Note(NumberedPitch &np, float &relTpos)  // relative temporal position 
+        : _pitch { np }, _reltmppos { relTpos } { } 
+
+    NumberedPitch getPitch() { return _pitch; }
+    float getTpos() { return _reltmppos; }
+
+private:
+    NumberedPitch _pitch;
+    float _reltmppos;
 
 };
 
@@ -226,23 +316,13 @@ class HarmonicFieldManager{
 
     public:
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
-};
+        NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
 
-//-----------------------------------------------------------------------------
-// Pitch Quantizer 
-//
-class PitchQuantizer{
-
-public:
-    PitchQuantizer(const HarmonicField &hfield);
-    
-    void setup(); // set up listener for midi messages from port X
-    void draw();  // handle incoming messages
-    
-    NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
-
-private:
-    vector<NumberedPitch> _pitchset;
+    private:
+        void setPropXpos();
+        vector<NumberedPitch> _pitchset;
+        float _probability;
+        float _propxpos;    // x position as proportion of timespan
 
 };
 
@@ -254,17 +334,17 @@ class QuantizedPitchManager{
     // Coordinates the incoming and outgoing messages
     //
     public:
-    QuantizedPitchManager(ofxMidiIn &inmsg, ofxOscMessage &outmsg);
+    //QuantizedPitchManager(ofxMidiIn &inmsg, ofxOscMessage &outmsg);
     
-    void setup(); // set up listeners
+    void setup(); // set up harmonic field managers
     void draw();  // create an array of four quantized pitches on the heap
                   // make sure these get destroyed once they are sent via osc
 
 private:
-    PitchQuantizer *_p1; 
-    PitchQuantizer *_p2; 
-    PitchQuantizer *_p3; 
-    PitchQuantizer *_p4; 
+    HarmonicFieldManager *_hfm1; 
+    HarmonicFieldManager *_hfm2; 
+    HarmonicFieldManager *_hfm3; 
+    HarmonicFieldManager *_hfm4; 
 
 };
 
@@ -272,6 +352,27 @@ private:
 //-----------------------------------------------------------------------------
 // Unit Tests 
 //
+
+class TimespanGraphTest : public::testing::Test {
+
+protected:
+    void SetUp() override {}
+
+    // this is a gui class and visuals are currently being tested via the
+    // construction of ofApp in the main function of the openframeworks program
+    TimespanGraph timespanTest { numberHFields };
+};
+
+class HarmonicFieldGraphTest : public::testing::Test {
+
+protected:
+    void SetUp() override {}
+    TimespanGraph tspanTest { numberHFields };
+    HarmonicFieldGraph hfieldg1 {'a', tspanTest};
+    HarmonicFieldGraph hfieldg2 {'b', tspanTest};
+    HarmonicFieldGraph hfieldg3 {'c', tspanTest};
+    HarmonicFieldGraph hfieldg4 {'d', tspanTest};
+};
 
 class NumberedPitchClassTest : public::testing::Test {
 
@@ -436,8 +537,6 @@ protected:
     vector<NumberedPitchClass> bfour2loc {b, cs, e};
 };
 
-
-
 class HarmonicFieldTest : public::testing::Test {
 
 protected:
@@ -462,8 +561,23 @@ protected:
     IntervalSegment major{ism.modeIntervalMap[MAJOR]};
     PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
 
-    // Create a harmonic field
+    // Create a pitch quantizer field
     vector<NumberedPitch> npitches { cmajman.getPitchSet() };
     HarmonicField h1 { npitches };
     PitchQuantizer cmajor { h1 };
 };
+
+class HarmonicFieldManagerTest : public::testing::Test{
+    void SetUp() override {} 
+    // mock up a timeline and four harmonic field graphs
+    TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
+    HarmonicFieldGraph hfield1{'a', timespangraph}; 
+    HarmonicFieldGraph hfield2{'b', timespangraph};  
+    HarmonicFieldGraph hfield3{'c', timespangraph};  
+    HarmonicFieldGraph hfield4{'d', timespangraph};
+    // check that access to all functionality is working
+    // - pitches
+    // - x, y location
+};
+
+class QuantizedPitchManagerTest : public::testing::Test{};
