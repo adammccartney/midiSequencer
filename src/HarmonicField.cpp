@@ -135,12 +135,99 @@ int HarmonicFieldGraph::getID(){ return _id; }
 //----------------------------------------------------------------------------
 // Pitch and Interval Datatypes 
 //
+//-----------------------------------------------------------------------------
+// Operators for pitch class enum 
+//
+
+PitchClass operator++(PitchClass& pc)
+{
+    pc = (pc == PitchClass::b) ? PitchClass::c : PitchClass(int(pc) + 1);
+    return pc;
+} 
+
+PitchClass operator--(PitchClass& pc)
+{
+    pc = (pc == PitchClass::c) ? PitchClass::b : PitchClass(int(pc) - 1);
+    return pc;
+} 
+
+//-----------------------------------------------------------------------------
+// NumberedPitchClass Members functions
+
+void NumberedPitchClass::init(){
+    _val = (int)name;
+}
+
+void NumberedPitchClass::NumberedPitchClass::transpose(int n)
+{
+    if(n < 0){
+        n = abs(n);
+        for(int i = 0; i < n; i++) --name;
+    }
+    else
+        for(int i = 0; i < n; i++) ++name;
+    setVal(name); 
+}
+
+//-----------------------------------------------------------------------------
+// Numbered Pitch member functions
+
+// Default constructor
+NumberedPitch::NumberedPitch()
+{
+    _val = 0;
+}
+
+//-----------------------------------------------------------------------------
+//
+
+bool NumberedPitch::operator==(NumberedPitch n)
+{
+    if(asInt() == n.asInt())
+        return true;
+    else
+        return false;
+}
+
+//-----------------------------------------------------------------------------
+//
+
+void NumberedPitch::transpose(int n)
+{
+    // do not process requests below "midi=0" or above "midi=127"
+    if(((_val + n) > 0) && (n < MIDIMAX)){ // the request is in range
+        _val += n;
+    }
+    else
+        throw std::invalid_argument("Invalid transposition");
+}
+
+
+
+//----------------------------------------------------------------------------
+//
+
+QuantizedPitch::QuantizedPitch(NumberedPitch &np, ofParameterGroup &params)
+    : _pitch { np }, _params { params }
+{
+    //TODO: make sure that params are getting put to good use
+
+}
+
+//-----------------------------------------------------------------------------
+// Interval segment manager: used to handle the interval distribution needed to
+// construct a harmonic field in a specific tonality.
+// i.e. The interval values stored here are an abstraction and describe a path
+// of n steps through an octave. 
 
 IntervalSegmentManager::IntervalSegmentManager(){ makeMap(); }
 
 map<Mode, vector<int>> IntervalSegmentManager::modeIntervalMap;
 
 void IntervalSegmentManager::makeMap() {
+    // sum of all interval steps from any root should equal octave
+    // we're using 12-tone equal temperament 
+    // so 12 steps ... like an alcoholic in recovery or a dodecahedron
     modeIntervalMap[MAJOR]=vector<int>{2, 2, 1, 2, 2, 2, 1}; //"M2 M2 m2 M2 M2 M2 m2"
     modeIntervalMap[MINOR]=vector<int>{2, 2, 1, 2, 2, 2, 1};//"M2 m2 M2 M2 m2 M2 M2"
     modeIntervalMap[HMINOR]=vector<int>{2, 2, 1, 2, 2, 2, 1};//"M2 m2 M2 M2 M2 m2 M2"
@@ -158,50 +245,20 @@ void IntervalSegmentManager::makeMap() {
     modeIntervalMap[SIX5]=vector<int>{4, 3, 2};//"M3 m3 M2"
     modeIntervalMap[MINSIX5]=vector<int>{3, 4, 1};//"m3 M3 m2"
     modeIntervalMap[FIVE4]=vector<int>{5, 2};//"P4 M2"
-    modeIntervalMap[MINFIVE4]=vector<int>{5, 1};//"P4 m2"
     modeIntervalMap[FOUR2]=vector<int>{2, 3};//"M2 m3"
-    modeIntervalMap[DIMFOUR2]=vector<int>{1, 4};//"m2 M3"
 }
+
 
 //-----------------------------------------------------------------------------
-
-void NumberedPitchClass::init(){
-    val = (int)name;
-}
-
-//-----------------------------------------------------------------------------
-
-
-int NumberedPitch::operator==(NumberedPitch n)
-{
-    if(asInt() == n.asInt())
-        return 1;
-    else
-        return 0;
-}
-
-//----------------------------------------------------------------------------
-//
-
-QuantizedPitch::QuantizedPitch(NumberedPitch &np, ofParameterGroup &params)
-    : _pitch { np }, _params { params }
-{
-    //TODO: make sure that params are getting put to good use
-
-}
-
-//-----------------------------------------------------------------------------
-//
+// Manager for pitch sets
 
 void PitchSetManager::makePitchClassSet()
-// set of pitch classes from a root and given scale in octave above mid c
+// makes a set of pitch classes using the members root and interval segment 
 {
     vector<NumberedPitchClass> pcset;
     NumberedPitchClass temppc { _root };
-    pcset.push_back(temppc);
-    for(int i = 0; i < _mode.intervals.size(); i++){
-        // move through intervals
-        // increment the value 
+    pcset.push_back(temppc); // append root first  
+    for(int i = 0; i < _mode.intervals.size() - 1; i++){ // don't take last step 
         temppc.transpose(_mode.intervals[i]);
         pcset.push_back(temppc); 
     }
@@ -214,14 +271,13 @@ void PitchSetManager::makePitchClassSet()
 //
 
 void PitchSetManager::makePitchSet()
+// makes a set of pitches across a span of 10 octaves using the member pitchset
 {
-    // makes a set of pitches across a span of 10 octaves
-    // retrieve vector of pitch classes and access them in the root octave
     int offset = 0;
     int pitchval = 0;
     vector<NumberedPitch> npv;
     for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
-        for(int j = 0; j < _pcset.size() - 1; j++){ // don't duplicate the octave
+        for(int j = 0; j < _pcset.size(); j++){ 
             offset = OCTAVE_OFFSETS[i];
             pitchval = _pcset[j].asInt() + offset;
             NumberedPitch np { pitchval };
@@ -237,7 +293,7 @@ void PitchSetManager::makePitchSet()
 PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
    : _root { root }, _mode { mode } 
 {
-    _minpitchval = (int)root - MIDCOFFSET; 
+    _minpitchval = (int)root; 
     makePitchClassSet();
     makePitchSet();
 } 
@@ -254,25 +310,18 @@ PitchQuantizer::PitchQuantizer(const HarmonicField &hfield)
 // 
 
 NumberedPitch PitchQuantizer::getQuantizedPitch(const NumberedPitch &inpitch){
-    // Tried to find inpitch in this objects pitchset
-    // first makes a new copy of inpitch
-    // tries to find that pitch in pitchset 
-    // if not found it tranposes toward the ceiling and returns recursive call
-
-    NumberedPitch n { inpitch.asInt() }; 
+    // Find inpitch in this objects _pitchset
+    // if not found tranpose up semitone and recurse
+    //
+    NumberedPitch n { inpitch.asInt() }; // initialize a new pitch
     
-    int max = MIDIMAX;
-    int tmp { 0 };
     auto p = find(_pitchset.begin(), _pitchset.end(), n);
+
     if(p != _pitchset.end()){
         return *p;
     }
     else{
         n.transpose(+1);
-        tmp = n.asInt();
-        if(tmp > max){
-            return -1; //TODO: make this throw an exception
-        }
         return getQuantizedPitch(n);
     }
 }

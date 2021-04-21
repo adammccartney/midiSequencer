@@ -32,6 +32,7 @@ for an instrument).
 # Todo
 
 20. April 2021
++ integrate unit tests
 + get gui to talk to logic structure for segments (selecting harmonies)
 + finish design of HarmonicFieldManager and QuantizedPitchManager, implement
 + figure out relationships needed to connect up 

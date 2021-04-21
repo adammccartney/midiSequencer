@@ -74,7 +74,7 @@ public:
 
     void setVal(int p) { _val = p; }
     
-    int asInt() { return _val; }
+    int asInt() const { return _val; }
 
     void transpose(int n);
     
@@ -141,18 +141,45 @@ private:
 class HarmonicField{
 
 public:
-    HarmonicField(vector<NumberedPitch> &pdata) : pitchset { pdata } {}
+    HarmonicField(vector<NumberedPitch> &pdata) : _pitchset { pdata } {}
 
-    //void setup();
-    //void update();
+    //void setup(); // intialize on opening app, listen to gui
+    //void draw();  // update according to changes from gui 
 
-    //int searchPitch(NumberedPitch &inpitch);
-    //int findPitch(const NumberedPitch &inpitch);
-    NumberedPitch getQuantizedPitch(NumberedPitch &inpitch);
+    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
 
 private:
-    vector<NumberedPitch> pitchset;
-    //vector<NumberedPitch>::iterator p;
+    vector<NumberedPitch> _pitchset;
+
+};
+
+//-----------------------------------------------------------------------------
+// Pitch Quantizer 
+//
+class PitchQuantizer{
+
+public:
+    PitchQuantizer(const HarmonicField &hfield);
+    NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
+
+private:
+    vector<NumberedPitch> _pitchset;
+
+};
+
+//-----------------------------------------------------------------------------
+// Manager for pitch quantizer 
+//
+
+class QuantizedPitchManager{
+    // Listens for incoming midi notes, upon the arrival of a new note, 
+    // runs the draw() function to create 
+public:
+    void setup(); // set up listeners
+    void draw();  // quantize pitches and route to output
+
+private:
+    const vector<PitchQuantizer> _pquantizers;
 
 };
 
@@ -338,4 +365,20 @@ protected:
     // Create a harmonic field
     vector<NumberedPitch> npitches { cmajman.getPitchSet() };
     HarmonicField cmajor { npitches };
+};
+
+
+class PitchQuantizerTest : public::testing::Test {
+
+protected:
+    void SetUp() override {} 
+
+    IntervalSegmentManager ism;
+    IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+    PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
+
+    // Create a harmonic field
+    vector<NumberedPitch> npitches { cmajman.getPitchSet() };
+    HarmonicField h1 { npitches };
+    PitchQuantizer cmajor { h1 };
 };

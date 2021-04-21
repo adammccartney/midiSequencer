@@ -67,6 +67,7 @@ void NumberedPitchClass::transpose(int n)
         for(int i = 0; i < n; i++) ++name;
     setVal(name); 
 }
+
 //-----------------------------------------------------------------------------
 //
 
@@ -100,7 +101,7 @@ void NumberedPitch::transpose(int n)
 }
 
 //-----------------------------------------------------------------------------
-//
+// Manager for pitch sets
 
 void PitchSetManager::makePitchClassSet()
 // makes a set of pitch classes using the members root and interval segment 
@@ -148,19 +149,27 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
     makePitchSet();
 } 
 
+//-----------------------------------------------------------------------------
+// Pitch Quantizer Class
+//
+
+PitchQuantizer::PitchQuantizer(const HarmonicField &hfield)
+    // pitchset is just a reference for the quantizer so it knows what values
+    // to use while processing an incoming pitch
+    : _pitchset { hfield.getPitchSet() }{}
+
 
 //-----------------------------------------------------------------------------
 
-NumberedPitch HarmonicField::getQuantizedPitch(NumberedPitch &inpitch){
-    NumberedPitch n { inpitch.asInt() }; // initialize a new pitch
+NumberedPitch PitchQuantizer::getQuantizedPitch(NumberedPitch inpitch){
     
-    auto p = find(pitchset.begin(), pitchset.end(), n);
-    if(p != pitchset.end()){
+    auto p = find(_pitchset.begin(), _pitchset.end(), inpitch);
+    if(p != _pitchset.end()){
         return *p;
     }
     else{
-        n.transpose(+1);
-        return getQuantizedPitch(n);
+        inpitch.transpose(+1);
+        return getQuantizedPitch(inpitch);
     }
 }
 
@@ -666,7 +675,7 @@ TEST_F(PitchManagerTest, PitchSetMadeCorrectly)
     dist.clear();
 }
 
-TEST_F(HarmonicFieldTest, QuantizesSinglePitch)
+TEST_F(PitchQuantizerTest, QuantizesSinglePitch)
 {
     NumberedPitch cs { 61 };
     NumberedPitch q1 { cmajor.getQuantizedPitch(cs) };
@@ -690,7 +699,7 @@ TEST_F(HarmonicFieldTest, QuantizesSinglePitch)
     }
 }
 
-TEST_F(HarmonicFieldTest, DoesNotQuantize)
+TEST_F(PitchQuantizerTest, DoesNotQuantize)
 // if the value is in field, leave as is
 {
     NumberedPitch c4 { 70 };

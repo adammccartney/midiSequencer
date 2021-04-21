@@ -95,12 +95,17 @@ public:
     // compiler makes simple constructor by default
     PitchClass name;
     void init();
-    void transpose(int n) { val += n; }
+
+    void setVal(PitchClass& pc) { _val = int(pc); }
+    int asInt() { return _val; }
     
-    int asInt() { return val; }
+    void transpose(int n);
+    
+    bool operator==(NumberedPitchClass& npc);
+    
 
 private:
-    int val;
+    int _val;
 };
 
 
@@ -110,22 +115,22 @@ private:
 class NumberedPitch {
     
 public:
-    // numbered according to midi note values (0, 127) = (C-2, G8)
-    NumberedPitch(int v) : val { v }{ }
+    // numbered according to midi note _values (0, 127) = (C-2, G8)
+    NumberedPitch(int v) : _val { v }{ }
+    NumberedPitch();
     // compiler makes simple destructor by default
     
     void init();
+    void setVal(int p) { _val = p; }
     
-    int asInt() const { return val; } 
-    void transpose(int n) { val += n; }
+    int asInt() const { return _val; } 
+    void transpose(int n);
     
-    int operator==(NumberedPitch n);
+    bool operator==(NumberedPitch n);
 
 private:
-    int val;
+    int _val;
 };
-
-
 
 
 //----------------------------------------------------------------------------
@@ -144,7 +149,7 @@ private:
 
 //-----------------------------------------------------------------------------
 //
-//TODO: make this generic so it can be used for floats (microtones) too
+//TODO: make this generic so it can be used for non 12-tet tunings
 
 struct IntervalSegment {
     // construct using an integer list (number of semitones)
@@ -155,7 +160,7 @@ struct IntervalSegment {
 
 enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
     LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
-    FIVE4, MINFIVE4, FOUR2, DIMFOUR2, MODECOUNT };
+    FIVE4, FOUR2, MODECOUNT };
 
 class IntervalSegmentManager{
 
