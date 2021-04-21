@@ -301,11 +301,13 @@ public:
         : _pitch { np }, _reltmppos { relTpos } { } 
 
     NumberedPitch getPitch() { return _pitch; }
-    float getTpos() { return _reltmppos; }
+    float getRtime() { return _reltmppos; }
+    float getProb() { return _probability; }
 
 private:
     NumberedPitch _pitch;
     float _reltmppos;
+    float _probability;
 
 };
 
@@ -315,14 +317,14 @@ private:
 class HarmonicFieldManager{
 
     public:
+        HarmonicFieldManager();
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
 
     private:
-        void setPropXpos();
         vector<NumberedPitch> _pitchset;
         float _probability;
-        float _propxpos;    // x position as proportion of timespan
+        float _rtime;    // x position as proportion of timespan
 
 };
 
@@ -334,18 +336,20 @@ class QuantizedPitchManager{
     // Coordinates the incoming and outgoing messages
     //
     public:
-    //QuantizedPitchManager(ofxMidiIn &inmsg, ofxOscMessage &outmsg);
+    QuantizedPitchManager(/*ofxMidiIn &in,*/const vector<HarmonicFieldManager> &hfm);
+    QuantizedPitchManager();
+    ~QuantizedPitchManager(){ delete pitch; delete[] _vhfm; }
     
-    void setup(); // set up harmonic field managers
-    void draw();  // create an array of four quantized pitches on the heap
-                  // make sure these get destroyed once they are sent via osc
-
+    //void draw();  // create an array of four quantized pitches on the heap
+                    // make sure these get destroyed once they are sent via osc
+    
 private:
-    HarmonicFieldManager *_hfm1; 
-    HarmonicFieldManager *_hfm2; 
-    HarmonicFieldManager *_hfm3; 
-    HarmonicFieldManager *_hfm4; 
-
+    void makePitch();
+    Note makeNote(NumberedPitch &p, float &prob, float &rtime);
+    NumberedPitch *pitch = new NumberedPitch;
+    int _numfields;
+    vector<HarmonicFieldManager> *_vhfm = new vector<HarmonicFieldManager>(); 
+    vector<Note> *_notes = new vector<Note>();
 };
 
 

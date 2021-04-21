@@ -289,13 +289,17 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
 } 
 
 //-----------------------------------------------------------------------------
-// Pitch Quantizer Class
-//
+// HarmonicFieldManager brings together logic 
+// from HarmonicField and HarmonicFieldGraph in order to make Notes 
 
 HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
     // pitchset is just a reference for the quantizer so it knows what values
     // to use while processing an incoming pitch
-    : _pitchset { hfield.getPitchSet() }{}
+    : _pitchset { hfield.getPitchSet() } 
+{
+    _rtime = hfgraph.getXPos();
+    _probability = hfgraph.getYPos();
+}
 
 
 //-----------------------------------------------------------------------------
@@ -311,6 +315,30 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
         return getQuantizedPitch(inpitch);
     }
 }
+
+//-----------------------------------------------------------------------------
+//
+//QuantizedPitchManager::QuantizedPitchManager(ofxMidiIn &in, ofxOscMessage &out)
+//{}
+
+QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
+    : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
+{
+    for(int i = 0; i < _numfields; i++){
+        _vhfm->push_back(vhfm[i]);
+    }
+}
+
+//-----------------------------------------------------------------------------
+//
+void QuantizedPitchManager::makePitch()
+{
+    // this turns the incoming midi note into a pitch
+}
+
+
+//-----------------------------------------------------------------------------
+//
 
 //-----------------------------------------------------------------------------
 // TEST FUNCTIONS 
