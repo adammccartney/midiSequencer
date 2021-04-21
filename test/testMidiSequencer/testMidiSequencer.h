@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include "ofMain.h"
+#include "ofxOscMessage.h"
+#include "ofxMidiIn.h"
 #include <vector>
 #include <map>
 #include "gtest/gtest.h"
@@ -22,6 +25,70 @@ using namespace::std;
 
 inline extern const int MIDCOFFSET { 60 };
 inline extern const int MIDIMAX { 127 };
+
+//-----------------------------------------------------------------------------
+// Graphics Ćlasses
+//
+
+class TimespanGraph{
+   // timespan acts mostly as a reference to the HarmonicFields
+
+public:
+
+   TimespanGraph(const int numharmonicfields);
+   // compiler generates default destructor
+
+   void draw();
+
+   float getLength();
+   ofVec2f getStart() { return _start; }
+   ofVec2f getEnd() { return _end; }
+
+   const int numHfields;
+
+private:
+   ofVec2f _start;
+   ofVec2f _end;
+   float _len;
+};
+
+class HarmonicFieldGraph{
+
+public:
+    HarmonicFieldGraph(char n, TimespanGraph& ts); 
+    // compiler generates default destructor
+
+    void setup();
+    void draw();
+    void update();
+
+    void updatePoints();
+
+    ofParameterGroup params;
+    ofParameter<int> x;
+    ofParameter<int> y;
+
+    vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
+    char name;
+    TimespanGraph& timespan;
+    string toString();
+    void setID();
+    int getID();
+    float getWidth() { return _width; }
+    
+    float hfxOrigin;
+    float localMin;
+    float localMax;
+    float length;
+
+private:
+    const float _width = 20.0;
+    const float _height = 5.0;
+    const int _numtones = 12; // 12 chromatic tones
+    int _id;
+
+};
+
 
 //----------------------------------------------------------------------------
 // Pitch and Interval Datatypes 
@@ -141,16 +208,24 @@ private:
 class HarmonicField{
 
 public:
-    HarmonicField(vector<NumberedPitch> &pdata) : _pitchset { pdata } {}
+    HarmonicField(vector<NumberedPitch> &pdata) 
+        : _pitchset { pdata } {}
 
     //void setup(); // intialize on opening app, listen to gui
     //void draw();  // update according to changes from gui 
 
-    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
-
 private:
     vector<NumberedPitch> _pitchset;
 
+};
+
+//-----------------------------------------------------------------------------
+// Pitch Quantizer 
+
+class HarmonicFieldManager{
+
+    public:
+        HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
 };
 
 //-----------------------------------------------------------------------------
@@ -160,6 +235,10 @@ class PitchQuantizer{
 
 public:
     PitchQuantizer(const HarmonicField &hfield);
+    
+    void setup(); // set up listener for midi messages from port X
+    void draw();  // handle incoming messages
+    
     NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
 
 private:
@@ -172,14 +251,20 @@ private:
 //
 
 class QuantizedPitchManager{
-    // Listens for incoming midi notes, upon the arrival of a new note, 
-    // runs the draw() function to create 
-public:
+    // Coordinates the incoming and outgoing messages
+    //
+    public:
+    QuantizedPitchManager(ofxMidiIn &inmsg, ofxOscMessage &outmsg);
+    
     void setup(); // set up listeners
-    void draw();  // quantize pitches and route to output
+    void draw();  // create an array of four quantized pitches on the heap
+                  // make sure these get destroyed once they are sent via osc
 
 private:
-    const vector<PitchQuantizer> _pquantizers;
+    PitchQuantizer *_p1; 
+    PitchQuantizer *_p2; 
+    PitchQuantizer *_p3; 
+    PitchQuantizer *_p4; 
 
 };
 
