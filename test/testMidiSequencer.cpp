@@ -8,6 +8,9 @@
 
 using namespace std;
 
+// N.B.: these tests avoid using any code that has to directly leverage
+// openFrameworks and uses mock-up logic instead to test that the interface
+// classes are working properly
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
 //
@@ -292,11 +295,25 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
 //-----------------------------------------------------------------------------
 // Note
 
+Note::Note(const Note& n)
+{
+    _pitch = n.getPitch();
+    _rtime = n.getRtime(); 
+    _probability = n.getProb();
+}
+
 void Note::setAll(NumberedPitch &p, float &rtime, float &prob)
 {
     _pitch = p;
     _rtime = rtime;
     _probability = prob;
+}
+
+string Note::toString()
+{
+    return "Pitch: " + to_string(getPitch().asInt()) + 
+           " rel time: " + to_string(getRtime()) + 
+           " prob: " + to_string(getProb()) + '\n';
 }
 
 //-----------------------------------------------------------------------------
@@ -344,7 +361,7 @@ QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> 
 //-----------------------------------------------------------------------------
 //
 
-NumberedPitch QuantizedPitchManager::getQuantizedPitch(int &hfindex, NumberedPitch p)
+NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitch p)
 // calls the get QuantizedPitch function of a specific hfield
 // returns quantized pitch
 {
@@ -359,20 +376,21 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int &hfindex, NumberedPit
 void QuantizedPitchManager::processMidiNote(const int &midiVal)
 {
     // initialize new pitch with incoming midi val
-    NumberedPitch np { midiVal };
-    _pitch.setPitch(np);
-    //float prob { 0.0 };
-    //float rtime { 0.0 };
-    //Note n {np, prob, rtime};
-    //NumberedPitch qp { np.asInt() };  // initialized a pitch
-    //// pass through each field and make note 
-    //for(int i = 0; i < _numfields; i++){
-    //    prob = _vhfm[i].getProb();
-    //    rtime = _vhfm[i].getRtime();
-    //    qp.setPitch(_vhfm[i].getQuantizedPitch(np));
-    //    n.setAll(np, prob, rtime); 
-    //    _notes[i] = n; 
-    //}
+    NumberedPitch np { midiVal }; 
+    _pitch = NumberedPitch { np } ; // set this as our starting pitch
+    NumberedPitch qp1, qp2, qp3, qp4;
+    qp1 = getQuantizedPitch(0, np);
+    Note n0 { qp1, 0.0, 0.0 };
+    _notes[0] = n0;
+    qp2 = getQuantizedPitch(1, np);
+    Note n1 { qp2, 0.1, 0.1 };
+    _notes[1] = n1;
+    qp3 = getQuantizedPitch(2, np);
+    Note n2 { qp3, 0.1, 0.1 };
+    _notes[2] = n2;
+    qp4 = getQuantizedPitch(3, np);
+    Note n3 { qp4, 0.1, 0.1 };
+    _notes[3] = n3;
 }
 
 
@@ -932,6 +950,16 @@ TEST_F(NoteTest, GettersWork)
     EXPECT_EQ(e1.getProb(), 70.0);
 }
 
+//TEST_F(NoteTest, CopyConstructorWorks)
+//{
+//    NumberedPitch c { 60 };
+//    float xloc { 0.5 };
+//    float yloc { 0.7 };
+//    Note n { c, xloc, yloc };
+//    Note n2 { n };
+//    EXPECT_EQ(n.getPitch().asInt(), n2.getPitch().asInt());
+//}
+
 TEST_F(HarmonicFieldManagerTest, QuantizesSinglePitch)
 {
     NumberedPitch cs { 61 };
@@ -1000,6 +1028,21 @@ TEST_F(QuantizedPitchManagerTest, InitializesPitchFromMidiNote)
     NumberedPitch np; 
     np.setPitch(notemaker.getOriginalPitch());
     EXPECT_EQ(np.asInt(), C4);
+}
+
+TEST_F(QuantizedPitchManagerTest, QuantizedValuesPushedToNotes)
+{
+    // harmonic fields are cmajor | dminor | flydian | ephrygian
+    NumberedPitch testpitch1 { 61 }; // cs
+    notemaker.processMidiNote(testpitch1.asInt());
+    vector<int> expected { 62, 62, 62, 62 };
+    //Note tn;
+    for(int i = 0; i<notemaker.numFields(); i++){
+        //tn = notemaker[i];
+    }
+    NumberedPitch tespitch2 { 59 }; // b
+    NumberedPitch tespitch3 { 63 }; // ds
+    NumberedPitch tespitch4 { 66 }; // fs
 }
 
 //-----------------------------------------------------------------------------

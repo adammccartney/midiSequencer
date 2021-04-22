@@ -16,6 +16,9 @@
 
 using namespace::std;
 
+// N.B.: These tests try to cover all logic functions, therefor anything that
+// leverages openFrameworks directly is commented out and a bunch of mock
+// values are declared as extern const
 //----------------------------------------------------------------------------
 // constants
 
@@ -24,7 +27,7 @@ inline extern const int MIDIMAX { 127 };
 
 //-----------------------------------------------------------------------------
 // Mock of functions for testing
-// N.B: The graphics classes are only here to model some behavior, it's not
+// N.B.: The graphics classes are only here to model some behavior, it's not
 // practical to wrap the whole openFrameworks application into this testing
 // framework, so graphics classes are modelled here locally, the actual
 // versions leverages openFrameworks and all of it's nicely contstructed types
@@ -302,11 +305,13 @@ public:
     Note(NumberedPitch &np, float rtime, float prob)  // relative temporal position 
         : _pitch { np }, _rtime { rtime }, _probability { prob } { } 
     Note();
+    Note(const Note& n); // copy constructor 
 
     void setAll(NumberedPitch &p, float &rtime, float &prob);
-    NumberedPitch getPitch() { return _pitch; }
-    float getRtime() { return _rtime; }
-    float getProb() { return _probability; }
+    NumberedPitch getPitch() const { return _pitch; }
+    auto getRtime() const  { return _rtime; }
+    auto getProb() const { return _probability; }
+    string toString();
 
 private:
     NumberedPitch _pitch;
@@ -352,7 +357,8 @@ public:
     void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
     NumberedPitch getOriginalPitch() { return _pitch; }
     int numFields(){ return _numfields; }
-    NumberedPitch getQuantizedPitch(int &hfindex, NumberedPitch p);
+    NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
+    Note &operator[](int i) { return _notes[i]; }
 
 private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);
