@@ -31,13 +31,17 @@ which then might do something useful (like make some control messages
 for an instrument). 
 # Todo
 
+22. April 2021
++ Figure out what's causing the segfault in the call to
+  QuantizedPitchManager::processMidiNote(const int &midVal)
+
 20. April 2021
 + integrate unit tests
 + normalize x y position on gui
 + get gui to talk to logic structure for segments (selecting harmonies)
 + finish design of HarmonicFieldManager and QuantizedPitchManager, implement
-+ figure out relationships needed to connect up 
-  - HarmonicField | HarmonicFieldManager QuantizedPitchManager | OscMessage
++ ~~figure out relationships needed to connect up~~
+  - ~~HarmonicField | HarmonicFieldManager QuantizedPitchManager | OscMessage~~
 + fire a tracer bullet and check that you haven't just built a pile of pooh
 
 19. April 2021
