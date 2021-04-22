@@ -288,6 +288,17 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
     makePitchSet();
 } 
 
+
+//-----------------------------------------------------------------------------
+// Note
+
+void Note::setAll(NumberedPitch &p, float &rtime, float &prob)
+{
+    _pitch = p;
+    _rtime = rtime;
+    _probability = prob;
+}
+
 //-----------------------------------------------------------------------------
 // HarmonicFieldManager brings together logic 
 // from HarmonicField and HarmonicFieldGraph in order to make Notes 
@@ -324,16 +335,44 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
 QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
     : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
 {
-    for(int i = 0; i < _numfields; i++){
-        _vhfm->push_back(vhfm[i]);
+    for(int i = 0; i < _numfields; i++)
+    {
+        _vhfm.push_back(vhfm[i]);
     }
 }
 
 //-----------------------------------------------------------------------------
 //
-void QuantizedPitchManager::makePitch()
+
+NumberedPitch QuantizedPitchManager::getQuantizedPitch(int &hfindex, NumberedPitch p)
+// calls the get QuantizedPitch function of a specific hfield
+// returns quantized pitch
 {
-    // this turns the incoming midi note into a pitch
+    NumberedPitch qp;
+    qp.setPitch(_vhfm[hfindex].getQuantizedPitch(p));
+    return qp;
+}
+
+//-----------------------------------------------------------------------------
+//
+
+void QuantizedPitchManager::processMidiNote(const int &midiVal)
+{
+    // initialize new pitch with incoming midi val
+    NumberedPitch np { midiVal };
+    _pitch.setPitch(np);
+    //float prob { 0.0 };
+    //float rtime { 0.0 };
+    //Note n {np, prob, rtime};
+    //NumberedPitch qp { np.asInt() };  // initialized a pitch
+    //// pass through each field and make note 
+    //for(int i = 0; i < _numfields; i++){
+    //    prob = _vhfm[i].getProb();
+    //    rtime = _vhfm[i].getRtime();
+    //    qp.setPitch(_vhfm[i].getQuantizedPitch(np));
+    //    n.setAll(np, prob, rtime); 
+    //    _notes[i] = n; 
+    //}
 }
 
 
@@ -450,6 +489,10 @@ TEST_F(NumberedPitchTest, TransposesCorrectly){
     np3.transpose(0);
     n = np3.asInt();
     EXPECT_EQ(n, 62);
+
+    np3.transpose(63); // value is 62, we want to see if we've included the upper octave in our range
+    n = np3.asInt();
+    EXPECT_EQ(n, 125);
 }
 
 TEST_F(IntervalSegmentTest, IntervalSegmentsContainRightNumSteps)
@@ -869,20 +912,40 @@ TEST_F(PitchManagerTest, PitchSetMadeCorrectly)
     dist.clear();
 }
 
-TEST_F(PitchQuantizerTest, QuantizesSinglePitch)
+TEST_F(NoteTest, GettersWork)
+{
+    NumberedPitch c { 60 };
+    NumberedPitch d { 62 };
+    NumberedPitch f { 65 };
+    NumberedPitch e { 64 };
+    EXPECT_EQ(c1.getPitch().asInt(), c.asInt());
+    EXPECT_EQ(d1.getPitch().asInt(), d.asInt());
+    EXPECT_EQ(f1.getPitch().asInt(), f.asInt());
+    EXPECT_EQ(e1.getPitch().asInt(), e.asInt());
+    EXPECT_EQ(c1.getRtime(), 20.0);
+    EXPECT_EQ(d1.getRtime(), 30.0);
+    EXPECT_EQ(f1.getRtime(), 40.0);
+    EXPECT_EQ(e1.getRtime(), 50.0);
+    EXPECT_EQ(c1.getProb(), 20.0);
+    EXPECT_EQ(d1.getProb(), 50.0);
+    EXPECT_EQ(f1.getProb(), 60.0);
+    EXPECT_EQ(e1.getProb(), 70.0);
+}
+
+TEST_F(HarmonicFieldManagerTest, QuantizesSinglePitch)
 {
     NumberedPitch cs { 61 };
-    NumberedPitch q1 { cmajor.getQuantizedPitch(cs) };
+    NumberedPitch q1 { cmanager.getQuantizedPitch(cs) };
     EXPECT_EQ(q1.asInt(), 62);
     NumberedPitch neg { -10000 };
     NumberedPitch large { 10000 };
     NumberedPitch borderlineneg { -1 };
     NumberedPitch borderlinepos { 128 };
     try {
-        NumberedPitch q2 { cmajor.getQuantizedPitch(neg) };
-        NumberedPitch q3 { cmajor.getQuantizedPitch(large) };
-        NumberedPitch q4 { cmajor.getQuantizedPitch(borderlineneg) };
-        NumberedPitch q5 { cmajor.getQuantizedPitch(borderlinepos) };
+        NumberedPitch q2 { cmanager.getQuantizedPitch(neg) };
+        NumberedPitch q3 { cmanager.getQuantizedPitch(large) }; // think these three might be redundant
+        NumberedPitch q4 { cmanager.getQuantizedPitch(borderlineneg) };
+        NumberedPitch q5 { cmanager.getQuantizedPitch(borderlinepos) };
         FAIL() << "Expected std::invalid_argument";
     }
     catch(std::invalid_argument & err) {
@@ -893,25 +956,51 @@ TEST_F(PitchQuantizerTest, QuantizesSinglePitch)
     }
 }
 
-TEST_F(PitchQuantizerTest, DoesNotQuantize)
-// if the value is in field, leave as is
+TEST_F(HarmonicFieldManagerTest, DoesNotQuantize)
+// if the value is equal to one specified by the field's pichset, leave as is
 {
-    NumberedPitch c4 { 70 };
-    NumberedPitch c5 { 72 };
-    NumberedPitch c0 { 0 };
-    NumberedPitch g8 { 127 };
-    vector<NumberedPitch> np { c4, c5, c0, g8 };
-    NumberedPitch q; 
-    vector<NumberedPitch> qp;
-    for(int i = 0; i < np.size(); i++){
-        q.setVal(np[i].asInt());
-        qp.push_back(q);
-    }
-    for(int i = 0; i < qp.size(); i++){
-        EXPECT_EQ(qp[i].asInt(), np[i].asInt());
+    NumberedPitch c4 { 60 };
+    NumberedPitch d4 { 62 };
+    NumberedPitch f4 { 65 };
+    NumberedPitch f8 { 125 };
+    NumberedPitch np;
+    np.setPitch(dmanager.getQuantizedPitch(c4));
+    EXPECT_EQ(np.asInt(), 60);
+    np.setVal(0);
+    np.setPitch(dmanager.getQuantizedPitch(d4));
+    EXPECT_EQ(np.asInt(), 62);
+    np.setVal(0);
+    np.setPitch(dmanager.getQuantizedPitch(f4));
+    EXPECT_EQ(np.asInt(), 65);
+    np.setVal(0);
+    np.setPitch(dmanager.getQuantizedPitch(f8));
+    EXPECT_EQ(np.asInt(), 125);
+    
+}
+
+TEST_F(QuantizedPitchManagerTest, AccessToLocalHfields)
+{
+    NumberedPitch tespitch1 { 61 }; // cs
+    NumberedPitch tespitch2 { 59 }; // b
+    NumberedPitch tespitch3 { 63 }; // ds
+    NumberedPitch tespitch4 { 66 }; // fs
+    vector<NumberedPitch> origins { 61, 59, 63, 66 };
+    vector <int> targets {62, 60, 64, 67};
+    NumberedPitch qpitch;
+    for(int i = 0; i < notemaker.numFields(); i++){
+        qpitch.setPitch(notemaker.getQuantizedPitch(i, origins[i]));
+        EXPECT_EQ(qpitch.asInt(), targets[i]);
     }
 }
 
+TEST_F(QuantizedPitchManagerTest, InitializesPitchFromMidiNote)
+{
+    int C4 { 60 };
+    notemaker.processMidiNote(C4);
+    NumberedPitch np; 
+    np.setPitch(notemaker.getOriginalPitch());
+    EXPECT_EQ(np.asInt(), C4);
+}
 
 //-----------------------------------------------------------------------------
 //

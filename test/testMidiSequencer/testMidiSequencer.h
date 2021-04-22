@@ -209,7 +209,8 @@ public:
     
     void init();
 
-    void setVal(int p) { _val = p; }
+    void setVal(int p) { _val = p; } // candidate for template function
+    void setPitch(NumberedPitch p) { _val = p.asInt(); }
     
     int asInt() const { return _val; }
 
@@ -268,7 +269,7 @@ private:
     int _minpitchval;
     vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
     vector<NumberedPitch> _pitches;       // this holds data for sonic
-    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108};
+    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120};
 };
 
 //-----------------------------------------------------------------------------
@@ -297,16 +298,19 @@ private:
 class Note{
 
 public:
-    Note(NumberedPitch &np, float &relTpos)  // relative temporal position 
-        : _pitch { np }, _reltmppos { relTpos } { } 
 
+    Note(NumberedPitch &np, float rtime, float prob)  // relative temporal position 
+        : _pitch { np }, _rtime { rtime }, _probability { prob } { } 
+    Note();
+
+    void setAll(NumberedPitch &p, float &rtime, float &prob);
     NumberedPitch getPitch() { return _pitch; }
-    float getRtime() { return _reltmppos; }
+    float getRtime() { return _rtime; }
     float getProb() { return _probability; }
 
 private:
     NumberedPitch _pitch;
-    float _reltmppos;
+    float _rtime;
     float _probability;
 
 };
@@ -320,6 +324,8 @@ class HarmonicFieldManager{
         HarmonicFieldManager();
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
+        float getProb() { return _probability; }
+        float getRtime() { return _rtime; }
 
     private:
         vector<NumberedPitch> _pitchset;
@@ -335,21 +341,25 @@ class HarmonicFieldManager{
 class QuantizedPitchManager{
     // Coordinates the incoming and outgoing messages
     //
-    public:
-    QuantizedPitchManager(/*ofxMidiIn &in,*/const vector<HarmonicFieldManager> &hfm);
+public:
+    QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
     QuantizedPitchManager();
-    ~QuantizedPitchManager(){ delete pitch; delete[] _vhfm; }
+    ~QuantizedPitchManager(){ /*delete[] _notes;*/ }
     
     //void draw();  // create an array of four quantized pitches on the heap
                     // make sure these get destroyed once they are sent via osc
     
+    void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
+    NumberedPitch getOriginalPitch() { return _pitch; }
+    int numFields(){ return _numfields; }
+    NumberedPitch getQuantizedPitch(int &hfindex, NumberedPitch p);
+
 private:
-    void makePitch();
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);
-    NumberedPitch *pitch = new NumberedPitch;
+    NumberedPitch _pitch;
     int _numfields;
-    vector<HarmonicFieldManager> *_vhfm = new vector<HarmonicFieldManager>(); 
-    vector<Note> *_notes = new vector<Note>();
+    vector<HarmonicFieldManager> _vhfm; 
+    vector<Note> _notes;
 };
 
 
@@ -541,6 +551,25 @@ protected:
     vector<NumberedPitchClass> bfour2loc {b, cs, e};
 };
 
+class NoteTest :public::testing::Test {
+
+protected:
+    void SetUp() override {} 
+    ofVec2f<float> h1 { 20.0, 20.0 };
+    ofVec2f<float> h2 { 30.0, 50.0 };
+    ofVec2f<float> h3 { 40.0, 60.0 };
+    ofVec2f<float> h4 { 50.0, 70.0 };
+    NumberedPitch c { 60 };
+    NumberedPitch d { 62 };
+    NumberedPitch f { 65 };
+    NumberedPitch e { 64 };
+    float h1x = h1.getX();
+    Note c1 { c, h1.getX(), h1.getY() };
+    Note d1 { d, h2.getX(), h2.getY() };
+    Note f1 { f, h3.getX(), h3.getY() };
+    Note e1 { e, h4.getX(), h4.getY() };
+};
+
 class HarmonicFieldTest : public::testing::Test {
 
 protected:
@@ -555,23 +584,9 @@ protected:
     HarmonicField cmajor { npitches };
 };
 
-
-class PitchQuantizerTest : public::testing::Test {
+class HarmonicFieldManagerTest : public::testing::Test{
 
 protected:
-    void SetUp() override {} 
-
-    IntervalSegmentManager ism;
-    IntervalSegment major{ism.modeIntervalMap[MAJOR]};
-    PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
-
-    // Create a pitch quantizer field
-    vector<NumberedPitch> npitches { cmajman.getPitchSet() };
-    HarmonicField h1 { npitches };
-    PitchQuantizer cmajor { h1 };
-};
-
-class HarmonicFieldManagerTest : public::testing::Test{
     void SetUp() override {} 
     // mock up a timeline and four harmonic field graphs
     TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
@@ -579,9 +594,68 @@ class HarmonicFieldManagerTest : public::testing::Test{
     HarmonicFieldGraph hfield2{'b', timespangraph};  
     HarmonicFieldGraph hfield3{'c', timespangraph};  
     HarmonicFieldGraph hfield4{'d', timespangraph};
-    // check that access to all functionality is working
-    // - pitches
-    // - x, y location
+
+    IntervalSegmentManager ism;
+    IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+    PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
+    IntervalSegment minor{ism.modeIntervalMap[MINOR]};
+    PitchSetManager dminman{PitchClass::d, minor};// dminor man...
+    IntervalSegment lydian{ism.modeIntervalMap[LYDIAN]};
+    PitchSetManager flydman{PitchClass::f, lydian};// flydian man...
+    IntervalSegment phrygian{ism.modeIntervalMap[PHRYGIAN]};
+    PitchSetManager ephryman{PitchClass::c, major};// ephrygian man...
+
+    vector<NumberedPitch> cpitches { cmajman.getPitchSet() };
+    HarmonicField cmajor { cpitches };
+    vector<NumberedPitch> dpitches { dminman.getPitchSet() };
+    HarmonicField dminor { dpitches };
+    vector<NumberedPitch> fpitches { flydman.getPitchSet() };
+    HarmonicField flydian { fpitches };
+    vector<NumberedPitch> epitches { ephryman.getPitchSet() };
+    HarmonicField ephrygian { epitches };
+
+    HarmonicFieldManager cmanager{cmajor, hfield1}; 
+    HarmonicFieldManager dmanager{dminor, hfield2}; 
+    HarmonicFieldManager fmanager{flydian, hfield3}; 
+    HarmonicFieldManager emanager{ephrygian, hfield4}; 
 };
 
-class QuantizedPitchManagerTest : public::testing::Test{};
+
+class QuantizedPitchManagerTest : public::testing::Test{
+protected:
+    void SetUp() override {}
+    // Copying all the setup like this might violate the principle of DRY code
+    // maybe tests can be wet? TODO: find out if there is a way to stay DRY
+    TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
+    HarmonicFieldGraph hfield1{'a', timespangraph}; 
+    HarmonicFieldGraph hfield2{'b', timespangraph};  
+    HarmonicFieldGraph hfield3{'c', timespangraph};  
+    HarmonicFieldGraph hfield4{'d', timespangraph};
+
+    IntervalSegmentManager ism;
+    IntervalSegment major{ism.modeIntervalMap[MAJOR]};
+    PitchSetManager cmajman{PitchClass::c, major};// cmajor man...
+    IntervalSegment minor{ism.modeIntervalMap[MINOR]};
+    PitchSetManager dminman{PitchClass::d, minor};// dminor man...
+    IntervalSegment lydian{ism.modeIntervalMap[LYDIAN]};
+    PitchSetManager flydman{PitchClass::f, lydian};// flydian man...
+    IntervalSegment phrygian{ism.modeIntervalMap[PHRYGIAN]};
+    PitchSetManager ephryman{PitchClass::c, major};// ephrygian man...
+
+    vector<NumberedPitch> cpitches { cmajman.getPitchSet() };
+    HarmonicField cmajor { cpitches };
+    vector<NumberedPitch> dpitches { dminman.getPitchSet() };
+    HarmonicField dminor { dpitches };
+    vector<NumberedPitch> fpitches { flydman.getPitchSet() };
+    HarmonicField flydian { fpitches };
+    vector<NumberedPitch> epitches { ephryman.getPitchSet() };
+    HarmonicField ephrygian { epitches };
+
+    HarmonicFieldManager cman{cmajor, hfield1}; 
+    HarmonicFieldManager dman{dminor, hfield2}; 
+    HarmonicFieldManager fman{flydian, hfield3}; 
+    HarmonicFieldManager eman{ephrygian, hfield4}; 
+
+    vector<HarmonicFieldManager> hfmanagers { cman, dman, fman, eman };
+    QuantizedPitchManager notemaker { hfmanagers };
+};
