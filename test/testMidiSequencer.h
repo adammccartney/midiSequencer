@@ -25,6 +25,8 @@ using namespace::std;
 
 inline extern const int MIDCOFFSET { 60 };
 inline extern const int MIDIMAX { 127 };
+inline extern const int MINFIELDS { 1 };
+inline extern const char DNAME { 'X' };
 
 //-----------------------------------------------------------------------------
 // Mock of functions for testing
@@ -104,6 +106,7 @@ class TimespanGraph{
 public:
 
    TimespanGraph(const int numharmonicfields);
+   TimespanGraph();
    // compiler generates default destructor
 
    //void draw();
@@ -112,7 +115,7 @@ public:
    ofVec2f<float> getStart() { return _start; }
    ofVec2f<float> getEnd() { return _end; }
 
-   const int numHfields;
+   const int numhfields;
 
 private:
    ofVec2f<float> _start;
@@ -120,10 +123,22 @@ private:
    float _len;
 };
 
+//-----------------------------------------------------------------------------
+// constant for default timespan, needed for harmonifieldgraph default
+// constructors. It makes sense to do this because if we don't insist that
+// there is a sensible default, there will be a bunch of divide by null or 0
+// errors 
+
+inline extern TimespanGraph TSGDEFAULT { 1 };
+
+//-----------------------------------------------------------------------------
+//
+
 class HarmonicFieldGraph{
 
 public:
     HarmonicFieldGraph(char n, TimespanGraph& ts); 
+    HarmonicFieldGraph();
     // compiler generates default destructor
 
     //void setup();
@@ -353,7 +368,6 @@ class QuantizedPitchManager{
 public:
     QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
     QuantizedPitchManager();
-    ~QuantizedPitchManager(){ /*delete[] _notes;*/ }
     
     //void draw();  // create an array of four quantized pitches on the heap
                     // make sure these get destroyed once they are sent via osc
@@ -362,8 +376,12 @@ public:
     NumberedPitch getOriginalPitch() { return _pitch; }
     int numFields(){ return _numfields; }
     NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
+
     Note getNote() { return _notes.front(); }
     void popNote(); 
+
+    float getRval(int n); // gets xcoord of nth harmonic field graph
+    float getProb(int n); // gets ycoord of nth harmonic field graph
 
 private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);

@@ -15,8 +15,11 @@ using namespace std;
 // Graphics Ćlasses
 //
 
+TimespanGraph::TimespanGraph()
+    : numhfields { MINFIELDS } {} 
+
 TimespanGraph::TimespanGraph(const int numharmonicfields)
-    : numHfields{numharmonicfields}
+    : numhfields{numharmonicfields}
 {
     //_start.x = 0.0;
     _start.setX(0.0);
@@ -45,6 +48,9 @@ HarmonicFieldGraph::HarmonicFieldGraph(char n, TimespanGraph& ts)
 {
     this->setID();
 }
+
+HarmonicFieldGraph::HarmonicFieldGraph()
+    :name{DNAME}, timespan{TSGDEFAULT} {}
 
 //-----------------------------------------------------------------------------
 //
@@ -356,8 +362,11 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
 
 //-----------------------------------------------------------------------------
 //
-//QuantizedPitchManager::QuantizedPitchManager(ofxMidiIn &in, ofxOscMessage &out)
-//{}
+
+QuantizedPitchManager::QuantizedPitchManager(){} // default constructor 
+
+//-----------------------------------------------------------------------------
+// Constructor
 
 QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
     : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
@@ -416,7 +425,18 @@ void QuantizedPitchManager::popNote()
 }
 
 //-----------------------------------------------------------------------------
-//
+// Coordinate getters 
+
+float QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
+{
+    HarmonicFieldGraph hfgr;
+    return 0.0;
+}
+
+float QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
+{
+    return 0.0;
+}
 
 //-----------------------------------------------------------------------------
 // TEST FUNCTIONS 
