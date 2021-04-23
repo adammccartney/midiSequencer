@@ -55,6 +55,8 @@ HarmonicFieldGraph::HarmonicFieldGraph()
 //-----------------------------------------------------------------------------
 //
 
+void HarmonicFieldGraph::setup()
+{
 //void HarmonicFieldGraph::setup(){
 //    // use _pos to determine position on timeline 
 //    // represents a subsection on the horizontal axis
@@ -70,7 +72,15 @@ HarmonicFieldGraph::HarmonicFieldGraph()
 //    //params.add(y.set("y", ofGetHeight() / 2, 0, ofGetHeight())); 
 //
 //    //updatePoints();
-//}
+
+      // mock setup for testing logic
+      length    = timespan.getLength() / timespan.numhfields;
+      hfxOrigin = timespan.getStart().getX() + ( length * (getID() - 1));
+      localMin  = hfxOrigin;
+      localMax  = hfxOrigin + length - getWidth();
+
+      setPos(hfxOrigin, localMax);
+}
 //
 //void HarmonicFieldGraph::updatePoints(){
 //    // this grabs info from the gui Sliders and updates the shape's data 
@@ -339,7 +349,7 @@ string Note::toString()
 HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
     // pitchset is just a reference for the quantizer so it knows what values
     // to use while processing an incoming pitch
-    : _pitchset { hfield.getPitchSet() } 
+    : _hfield { hfield }, _hfgraph { hfgraph }, _pitchset { hfield.getPitchSet() } 
 {
     _rtime = hfgraph.getXPos();
     _probability = hfgraph.getYPos();
@@ -390,6 +400,26 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 }
 
 //-----------------------------------------------------------------------------
+// Coordinate getters
+// usage: gui coordinates contain rhythmic and probabilty info about a note 
+
+float QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
+{
+    if((0 <= n) && (n < _numfields)) // in range, proceed
+        return _vhfm[n].getRtime();
+    else
+        throw std::out_of_range("HField index out of range");
+}
+
+float QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
+{
+    if((0 <= n) && (n < _numfields)) // in range, proceed
+        return _vhfm[n].getProb();
+    else
+        throw std::out_of_range("HField index out of range");
+}
+
+//-----------------------------------------------------------------------------
 // Here the incoming midi note is quantized and pushed to the stack of notes in
 // the object
 
@@ -403,19 +433,43 @@ void QuantizedPitchManager::processMidiNote(const int &midiVal)
     // q4 = quantize(q3)
     NumberedPitch np { midiVal }; 
     _pitch = NumberedPitch { np } ; // set this as our starting pitch
-    NumberedPitch qp1, qp2, qp3, qp4;
-    qp1 = getQuantizedPitch(0, np);
-    Note n0 { qp1, 0.0, 0.0 };
+    NumberedPitch qp0, qp1, qp2, qp3;
+    
+    float rval0, rval1, rval2, rval3;
+    float prob0, prob1, prob2, prob3;
+    qp0 = getQuantizedPitch(0, np); // start with incoming pitch at index 0
+    rval0 = getRval(0);
+    prob0 = getProb(0);
+    Note n0 { qp0, rval0, prob0 };
     _notes.push(n0);
-    qp2 = getQuantizedPitch(1, qp1);
-    Note n1 { qp2, 0.1, 0.1 };
+    qp1 = getQuantizedPitch(1, qp0);
+    rval1 = getRval(1);
+    prob1 = getProb(1);
+    Note n1 { qp1, rval1, prob1 };
     _notes.push(n1);
-    qp3 = getQuantizedPitch(2, qp2);
-    Note n2 { qp3, 0.1, 0.1 };
+    qp2 = getQuantizedPitch(2, qp1);
+    rval2 = getRval(2);
+    prob2 = getProb(2);
+    Note n2 { qp2, rval2, prob2 };
     _notes.push(n2);
-    qp4 = getQuantizedPitch(3, qp3);
-    Note n3 { qp4, 0.1, 0.1 };
+    qp3 = getQuantizedPitch(3, qp2);
+    rval3 = getRval(2);
+    prob3 = getProb(2);
+    Note n3 { qp3, rval3, prob3 };
     _notes.push(n3);
+
+
+    // TODO: fix the segfault in this loop
+    //vector<NumberedPitch> qpitches { np, qp0, qp1, qp2, qp3 };
+    //vector<float> rvals;
+    //vector<float> probs;
+    //for(int i = 0; i < qpitches.size(); i++){
+    //    qpitches[i + 1] = getQuantizedPitch(i, qpitches[i]); 
+    //    rvals[i] = getRval(i);
+    //    probs[i] = getProb(i);
+    //    Note n { qpitches[i+1], rvals[i], probs[i] };
+    //    _notes.push(n);
+    //}
 }
 
 
@@ -424,19 +478,6 @@ void QuantizedPitchManager::popNote()
     _notes.pop();
 }
 
-//-----------------------------------------------------------------------------
-// Coordinate getters 
-
-float QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
-{
-    HarmonicFieldGraph hfgr;
-    return 0.0;
-}
-
-float QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
-{
-    return 0.0;
-}
 
 //-----------------------------------------------------------------------------
 // TEST FUNCTIONS 
@@ -1095,6 +1136,28 @@ TEST_F(QuantizedPitchManagerTest, QuantizedValuesPushedToNotes)
     vector<int> expected4 { 67, 67, 67, 67 };
     notemaker.processMidiNote(testpitch1.asInt());
     testQueue(tn, expected4);
+}
+
+TEST_F(QuantizedPitchManagerTest, NoteRvalueSetCorrectly)
+{
+    notemaker.setup();
+    NumberedPitch testpitch1 { 61 }; // 
+    notemaker.processMidiNote(testpitch1.asInt());
+    EXPECT_EQ(notemaker.getRval(0), 17.0); 
+    EXPECT_EQ(notemaker.getRval(1), 41.0);
+    EXPECT_EQ(notemaker.getRval(2), 65.0); 
+    EXPECT_EQ(notemaker.getRval(3), 89.0); 
+}
+
+TEST_F(QuantizedPitchManagerTest, NoteProbSetCorrectly)
+{
+    notemaker.setup();
+    NumberedPitch testpitch1 { 61 };
+    notemaker.processMidiNote(testpitch1.asInt());
+    EXPECT_EQ(notemaker.getProb(0), 19);
+    EXPECT_EQ(notemaker.getProb(1), 43);
+    EXPECT_EQ(notemaker.getProb(2), 67);
+    EXPECT_EQ(notemaker.getProb(3), 91);
 }
 
 //-----------------------------------------------------------------------------

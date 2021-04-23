@@ -141,7 +141,7 @@ public:
     HarmonicFieldGraph();
     // compiler generates default destructor
 
-    //void setup();
+    void setup();
     //void draw();
     //void update();
 
@@ -351,7 +351,11 @@ class HarmonicFieldManager{
         float getProb() { return _probability; }
         float getRtime() { return _rtime; }
 
+        void setup() { _hfgraph.setup(); }
+
     private:
+        HarmonicField _hfield;
+        HarmonicFieldGraph _hfgraph;
         vector<NumberedPitch> _pitchset;
         float _probability;
         float _rtime;    // x position as proportion of timespan
@@ -368,6 +372,8 @@ class QuantizedPitchManager{
 public:
     QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
     QuantizedPitchManager();
+
+    void setup() { for(int i = 0; i < numFields(); i++) _vhfm[i].setup(); }
     
     //void draw();  // create an array of four quantized pitches on the heap
                     // make sure these get destroyed once they are sent via osc
@@ -386,7 +392,7 @@ public:
 private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);
     NumberedPitch _pitch;
-    int _numfields;
+    int _numfields; // set by size of constructor's vector
     vector<HarmonicFieldManager> _vhfm; 
     queue<Note> _notes;
 };
@@ -695,4 +701,5 @@ protected:
             EXPECT_EQ(tn.getPitch().asInt(), expected[i]);
         }
     }
+
 };
