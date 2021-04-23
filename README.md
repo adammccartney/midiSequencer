@@ -29,20 +29,25 @@ Sequencer receives notes from a midi port and communicates the generated
 sequencer over OSC to some other program (chuck/supercollider/puredata), 
 which then might do something useful (like make some control messages 
 for an instrument). 
+
 # Todo
 
+23. April 2021
++ implement and test getters for Note relative time and probabilty members
++ normalize x y position on gui
++ integrate unit tests
++ get gui to talk to logic structure for segments (selecting harmonies)
++ fire a tracer bullet and check that you haven't just built a pile of pooh
+
 22. April 2021
-+ Figure out what's causing the segfault in the call to
-  QuantizedPitchManager::processMidiNote(const int &midVal)
++ ~~Figure out what's causing the segfault in the call to
+  QuantizedPitchManager::processMidiNote(const int &midVal)~~
 
 20. April 2021
-+ integrate unit tests
-+ normalize x y position on gui
-+ get gui to talk to logic structure for segments (selecting harmonies)
-+ finish design of HarmonicFieldManager and QuantizedPitchManager, implement
++ ~~finish design of HarmonicFieldManager and QuantizedPitchManager,
+  implement~~
 + ~~figure out relationships needed to connect up~~
   - ~~HarmonicField | HarmonicFieldManager QuantizedPitchManager | OscMessage~~
-+ fire a tracer bullet and check that you haven't just built a pile of pooh
 
 19. April 2021
 + ~~reformat unit tests to use Google Tests~~ (turns out a giant corporation

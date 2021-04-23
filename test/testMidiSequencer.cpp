@@ -302,6 +302,16 @@ Note::Note(const Note& n)
     _probability = n.getProb();
 }
 
+Note::Note(){}
+
+Note& Note::operator=(const Note& n)
+{
+    _pitch = n.getPitch();
+    _rtime = n.getRtime(); 
+    _probability = n.getProb();
+    return *this;
+}
+
 void Note::setAll(NumberedPitch &p, float &rtime, float &prob)
 {
     _pitch = p;
@@ -371,28 +381,35 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 }
 
 //-----------------------------------------------------------------------------
-//
+// Here the incoming midi note is quantized and pushed to the stack of notes in
+// the object
 
 void QuantizedPitchManager::processMidiNote(const int &midiVal)
 {
+    // first clear array of existing notes
     // initialize new pitch with incoming midi val
     NumberedPitch np { midiVal }; 
     _pitch = NumberedPitch { np } ; // set this as our starting pitch
     NumberedPitch qp1, qp2, qp3, qp4;
     qp1 = getQuantizedPitch(0, np);
     Note n0 { qp1, 0.0, 0.0 };
-    _notes[0] = n0;
+    _notes.push(n0);
     qp2 = getQuantizedPitch(1, np);
     Note n1 { qp2, 0.1, 0.1 };
-    _notes[1] = n1;
+    _notes.push(n1);
     qp3 = getQuantizedPitch(2, np);
     Note n2 { qp3, 0.1, 0.1 };
-    _notes[2] = n2;
+    _notes.push(n2);
     qp4 = getQuantizedPitch(3, np);
     Note n3 { qp4, 0.1, 0.1 };
-    _notes[3] = n3;
+    _notes.push(n3);
 }
 
+
+void QuantizedPitchManager::popNote()
+{
+    _notes.pop();
+}
 
 //-----------------------------------------------------------------------------
 //
@@ -1033,16 +1050,27 @@ TEST_F(QuantizedPitchManagerTest, InitializesPitchFromMidiNote)
 TEST_F(QuantizedPitchManagerTest, QuantizedValuesPushedToNotes)
 {
     // harmonic fields are cmajor | dminor | flydian | ephrygian
-    NumberedPitch testpitch1 { 61 }; // cs
+    NumberedPitch testpitch1 { 61 }; // 
     notemaker.processMidiNote(testpitch1.asInt());
     vector<int> expected { 62, 62, 62, 62 };
-    //Note tn;
-    for(int i = 0; i<notemaker.numFields(); i++){
-        //tn = notemaker[i];
-    }
-    NumberedPitch tespitch2 { 59 }; // b
-    NumberedPitch tespitch3 { 63 }; // ds
-    NumberedPitch tespitch4 { 66 }; // fs
+
+    Note tn; 
+    testQueue(tn, expected);
+
+    testpitch1.setVal(59); // b 
+    vector<int> expected2 { 59, 60, 59, 59 };
+    notemaker.processMidiNote(testpitch1.asInt());
+    testQueue(tn, expected2);
+
+    testpitch1.setVal(63); // ds 
+    vector<int> expected3 { 64, 64, 64, 64 };
+    notemaker.processMidiNote(testpitch1.asInt());
+    testQueue(tn, expected3);
+    
+    testpitch1.setVal(66); // fs 
+    vector<int> expected4 { 67, 67, 67, 67 };
+    notemaker.processMidiNote(testpitch1.asInt());
+    testQueue(tn, expected4);
 }
 
 //-----------------------------------------------------------------------------

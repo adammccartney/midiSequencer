@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include "gtest/gtest.h"
+#include <queue>
 
 using namespace::std;
 
@@ -304,8 +305,11 @@ public:
 
     Note(NumberedPitch &np, float rtime, float prob)  // relative temporal position 
         : _pitch { np }, _rtime { rtime }, _probability { prob } { } 
+    
     Note();
+
     Note(const Note& n); // copy constructor 
+    Note& operator=(const Note& n);
 
     void setAll(NumberedPitch &p, float &rtime, float &prob);
     NumberedPitch getPitch() const { return _pitch; }
@@ -358,14 +362,15 @@ public:
     NumberedPitch getOriginalPitch() { return _pitch; }
     int numFields(){ return _numfields; }
     NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
-    Note &operator[](int i) { return _notes[i]; }
+    Note getNote() { return _notes.front(); }
+    void popNote(); 
 
 private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);
     NumberedPitch _pitch;
     int _numfields;
     vector<HarmonicFieldManager> _vhfm; 
-    vector<Note> _notes;
+    queue<Note> _notes;
 };
 
 
@@ -664,4 +669,12 @@ protected:
 
     vector<HarmonicFieldManager> hfmanagers { cman, dman, fman, eman };
     QuantizedPitchManager notemaker { hfmanagers };
+
+    void testQueue(Note &tn, vector<int> expected){
+        for(int i = 0; i < notemaker.numFields(); i++){
+            tn = notemaker.getNote();
+            notemaker.popNote();
+            EXPECT_EQ(tn.getPitch().asInt(), expected[i]);
+        }
+    }
 };
