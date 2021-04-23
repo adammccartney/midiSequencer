@@ -386,21 +386,25 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 
 void QuantizedPitchManager::processMidiNote(const int &midiVal)
 {
-    // first clear array of existing notes
-    // initialize new pitch with incoming midi val
+    // quantized pitches are pushed on to a FiFo stack // queue 
+    // quantizers work in a pipeline and modify pitch continuously 
+    // q1 = quantize(p1) 
+    // q2 = quantize(q1)
+    // q3 = quantize(q2)
+    // q4 = quantize(q3)
     NumberedPitch np { midiVal }; 
     _pitch = NumberedPitch { np } ; // set this as our starting pitch
     NumberedPitch qp1, qp2, qp3, qp4;
     qp1 = getQuantizedPitch(0, np);
     Note n0 { qp1, 0.0, 0.0 };
     _notes.push(n0);
-    qp2 = getQuantizedPitch(1, np);
+    qp2 = getQuantizedPitch(1, qp1);
     Note n1 { qp2, 0.1, 0.1 };
     _notes.push(n1);
-    qp3 = getQuantizedPitch(2, np);
+    qp3 = getQuantizedPitch(2, qp2);
     Note n2 { qp3, 0.1, 0.1 };
     _notes.push(n2);
-    qp4 = getQuantizedPitch(3, np);
+    qp4 = getQuantizedPitch(3, qp3);
     Note n3 { qp4, 0.1, 0.1 };
     _notes.push(n3);
 }
@@ -1058,7 +1062,7 @@ TEST_F(QuantizedPitchManagerTest, QuantizedValuesPushedToNotes)
     testQueue(tn, expected);
 
     testpitch1.setVal(59); // b 
-    vector<int> expected2 { 59, 60, 59, 59 };
+    vector<int> expected2 { 59, 60, 60, 60 };
     notemaker.processMidiNote(testpitch1.asInt());
     testQueue(tn, expected2);
 
