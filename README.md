@@ -1,6 +1,5 @@
-# midi Sequencer
+## midi Sequencer
 
-!!! pre-release, Under heavy construction, not intended for distribution !!!
 
 A simple openFrameworks project that generates a four note midi sequence given
 a note in. 
@@ -11,8 +10,9 @@ a note in.
 
 ![gui screenshot](img/guiScreenshot.png)
 
+***currently a pre-release and nder heavy construction***
 
-# Compilation 
+## Compilation 
 
 ```
 cd $OFROOT/apps/myApps/
@@ -30,7 +30,7 @@ sequencer over OSC to some other program (chuck/supercollider/puredata),
 which then might do something useful (like make some control messages 
 for an instrument). 
 
-# Todo
+## Todo
 
 23. April 2021
 + implement and test getters for Note relative time and probabilty members
