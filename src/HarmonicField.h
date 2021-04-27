@@ -10,6 +10,7 @@
     
 inline extern const int MIDCOFFSET { 60 };
 inline extern const int MIDIMAX { 127 };
+inline extern const int MINFIELDS { 1 };
 
 
 //-----------------------------------------------------------------------------
@@ -22,6 +23,7 @@ class TimespanGraph{
 public:
 
    TimespanGraph(const int numharmonicfields);
+   TimespanGraph();
    // compiler generates default destructor
 
    void draw();
@@ -30,13 +32,24 @@ public:
    ofVec2f getStart() { return _start; }
    ofVec2f getEnd() { return _end; }
 
-   const int numHfields;
+   const int numhfields;
 
 private:
    ofVec2f _start;
    ofVec2f _end;
    float _len;
 };
+
+//-----------------------------------------------------------------------------
+// constant for default timespan, needed for harmonifieldgraph default
+// constructors. It makes sense to do this because if we don't insist that
+// there is a sensible default, there will be a bunch of divide by null or 0
+// errors 
+
+inline extern TimespanGraph TSGDEFAULT { 1 };
+
+//-----------------------------------------------------------------------------
+//
 
 class HarmonicFieldGraph{
 
@@ -61,6 +74,8 @@ public:
     void setID();
     int getID();
     float getWidth() { return _width; }
+    int getXPos() { return x; } 
+    int getYPos() { return y; }
     
     float hfxOrigin;
     float localMin;
@@ -83,6 +98,8 @@ enum PitchClass {
     c, cs, d, ds, e, f, fs, g, gs, a, as, b
 };
 
+PitchClass operator++(PitchClass& pc);
+PitchClass operator--(PitchClass& pc);
 
 //----------------------------------------------------------------------------
 //
@@ -90,24 +107,23 @@ enum PitchClass {
 class NumberedPitchClass {
 
 public:
-    // simple data class to give some functionalits to PitchClass
+    // numbered according to midi note values in the middle c octave (60-72)
     NumberedPitchClass(PitchClass pc) : name { pc }{ init(); }
-    // compiler makes simple constructor by default
+    NumberedPitchClass();
+    // compiler makes simple destructor by default
     PitchClass name;
     void init();
-
+    
     void setVal(PitchClass& pc) { _val = int(pc); }
     int asInt() { return _val; }
-    
+
     void transpose(int n);
     
     bool operator==(NumberedPitchClass& npc);
-    
 
 private:
     int _val;
 };
-
 
 //----------------------------------------------------------------------------
 //
@@ -115,15 +131,18 @@ private:
 class NumberedPitch {
     
 public:
-    // numbered according to midi note _values (0, 127) = (C-2, G8)
+    // numbered according to midi note values (0, 127) = (C-2, G8)
     NumberedPitch(int v) : _val { v }{ }
     NumberedPitch();
     // compiler makes simple destructor by default
     
     void init();
-    void setVal(int p) { _val = p; }
+
+    void setVal(int p) { _val = p; } // candidate for template function
+    void setPitch(NumberedPitch p) { _val = p.asInt(); }
     
-    int asInt() const { return _val; } 
+    int asInt() const { return _val; }
+
     void transpose(int n);
     
     bool operator==(NumberedPitch n);
@@ -132,24 +151,36 @@ private:
     int _val;
 };
 
+//-----------------------------------------------------------------------------
+// Note
 
-//----------------------------------------------------------------------------
-//
-
-class QuantizedPitch {
+class Note{
 
 public:
-    QuantizedPitch(NumberedPitch &np, ofParameterGroup &params);
+
+    Note(NumberedPitch &np, float rtime, float prob)  // relative temporal position 
+        : _pitch { np }, _rtime { rtime }, _probability { prob } { } 
+    
+    Note();
+
+    Note(const Note& n); // copy constructor 
+    Note& operator=(const Note& n);
+
+    void setAll(NumberedPitch &p, float &rtime, float &prob);
+    NumberedPitch getPitch() const { return _pitch; }
+    auto getRtime() const  { return _rtime; }
+    auto getProb() const { return _probability; }
+    string toString();
 
 private:
     NumberedPitch _pitch;
-    ofParameterGroup _params;
+    float _rtime;
+    float _probability;
 
 };
 
 //-----------------------------------------------------------------------------
-//
-//TODO: make this generic so it can be used for non 12-tet tunings
+//TODO: make this generic so it can be used for floats (microtones) too
 
 struct IntervalSegment {
     // construct using an integer list (number of semitones)
@@ -173,6 +204,12 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+// Larger Classes used to as types of factories and managers for coordinating
+// lower level logical types (pitch classes, pitches, notes, intervals) with
+// harmonic information. 
+// These are the core logic classes of the app and do most of the heavy
+// lifting. 
+//
 
 class PitchSetManager{
 
@@ -192,7 +229,7 @@ private:
     int _minpitchval;
     vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
     vector<NumberedPitch> _pitches;       // this holds data for sonic
-    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108};
+    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120};
 };
 
 //-----------------------------------------------------------------------------
@@ -202,11 +239,11 @@ private:
 class HarmonicField{
 
 public:
-    // test constructor
-    HarmonicField(vector<NumberedPitch> &pdata) : _pitchset { pdata } {}
-    // constructor should work with a reference to the HarmonicFieldGraph 
-    // 
-    // HarmonicField(const HarmonicFieldGraph &hfgraph); 
+    HarmonicField(vector<NumberedPitch> &pdata) 
+        : _pitchset { pdata } {}
+
+    //void setup(); // intialize on opening app, listen to gui
+    //void draw();  // update according to changes from gui 
     
     const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
 
@@ -215,17 +252,27 @@ private:
 
 };
 
+
 //-----------------------------------------------------------------------------
 // Pitch Quantizer 
-//
-class PitchQuantizer{
 
-public:
-    PitchQuantizer(const HarmonicField &hfield);
-    NumberedPitch getQuantizedPitch(const NumberedPitch &inpitch);
+class HarmonicFieldManager{
 
-private:
-    const vector<NumberedPitch> _pitchset;
+    public:
+        HarmonicFieldManager();
+        HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
+        NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
+        float getProb() { return _probability; }
+        float getRtime() { return _rtime; }
+
+        void setup() { _hfgraph.setup(); }
+
+    private:
+        HarmonicField _hfield;
+        HarmonicFieldGraph _hfgraph;
+        vector<NumberedPitch> _pitchset;
+        float _probability;
+        float _rtime;    // x position as proportion of timespan
 
 };
 
@@ -234,24 +281,34 @@ private:
 //
 
 class QuantizedPitchManager{
-    // Listens for incoming midi notes, upon the arrival of a new note, 
-    // runs the draw() function to create 
+    // Coordinates the incoming and outgoing messages
+    //
 public:
-    void setup(); // set up listeners
-    void draw();  // quantize pitches and route to output
+    QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
+    QuantizedPitchManager();
+
+    void setup() { for(int i = 0; i < numFields(); i++) _vhfm[i].setup(); }
+    
+    //void draw();  // create an array of four quantized pitches on the heap
+                    // make sure these get destroyed once they are sent via osc
+    
+    void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
+    NumberedPitch getOriginalPitch() { return _pitch; }
+    int numFields(){ return _numfields; }
+    NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
+
+    Note getNote() { return _notes.front(); }
+    void popNote(); 
+
+    float getRval(int n); // gets xcoord of nth harmonic field graph
+    float getProb(int n); // gets ycoord of nth harmonic field graph
 
 private:
-    const vector<PitchQuantizer> _pquantizers;
-
+    Note makeNote(NumberedPitch &p, float &prob, float &rtime);
+    NumberedPitch _pitch;
+    int _numfields; // set by size of constructor's vector
+    vector<HarmonicFieldManager> _vhfm; 
+    queue<Note> _notes;
 };
 
-//-----------------------------------------------------------------------------
-// Initialization steps for creating a group of quantized notes
-//
-// 1. IntervalSegmentManager ism; // this is a static class
-// 2. IntervalSegment major{ism.modeIntervalMap[MAJOR]};
-// 3. PitchSetManager pcman{PitchClass::c, major}; 
-// 4. HarmonicField hfield{pcman.getPitchSet()};
-// 5. PitchQuantizer pq{hfeld};
-// 6. NumberePitch newpitch = pq.getQuantizedPitch();
-//
+
