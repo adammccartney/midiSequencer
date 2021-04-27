@@ -5,12 +5,12 @@ void ofApp::setup(){
     ofBackground(120);
     ofSetFrameRate(60);
 
-    //for(auto i = 0; i < hfgrphs.size(); i++){
-    //    // set up some naming conventions for hfield parameters
-    //    hfgrphs[i]->setup();
-    //    mainGroup.add(hfgrphs[i]->params);
-    //}
-    //gui.setup(mainGroup);
+    for(auto i = 0; i < hfgrphs.size(); i++){
+        // set up some naming conventions for hfield parameters
+        hfgrphs[i]->setup();
+        mainGroup.add(hfgrphs[i]->params);
+    }
+    gui.setup(mainGroup);
 }
 
 //--------------------------------------------------------------
@@ -19,11 +19,11 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-   // timespangraph.draw();
-   // for(auto i = 0; i < hfgrphs.size(); i++){
-   //     hfgrphs[i]->draw();
-   // }
-   // gui.draw();
+    timespangraph.draw();
+    for(auto i = 0; i < hfgrphs.size(); i++){
+        hfgrphs[i]->draw();
+    }
+    gui.draw();
 }
 
 //--------------------------------------------------------------

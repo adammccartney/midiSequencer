@@ -104,7 +104,7 @@ PROJECT_ROOT = /home/adam/openFrameworks/apps/myApps/midiSequencer
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_CFLAGS = -std=c++17 
+# PROJECT_CFLAGS =  
 
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS
