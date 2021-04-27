@@ -33,8 +33,7 @@ for an instrument).
 ## Todo
 
 23. April 2021
-+ implement and test getters for Note relative time and probabilty members
-+ normalize x y position on gui
++ ~~implement and test getters for Note relative time and probabilty members~~
 + integrate unit tests
 + get gui to talk to logic structure for segments (selecting harmonies)
 + fire a tracer bullet and check that you haven't just built a pile of pooh
