@@ -31,21 +31,24 @@ which then might do something useful (like make some control messages
 for an instrument). 
 
 ## Todo
-27. April 2021
+
+28. April 2021
++ get gui to talk to logic structure for segments (selecting harmonies)
++ fire a tracer bullet and check that you haven't just built a pile of pooh
 + add help menu (work with h key to toggle display of available modes)
-+ add two text input fields per HarmonicField on the GUI in order to manager
-  root and mode input
-+ figure out correct scope to make PitchSetManager from gui. PitchSetManager
-  depends on two input criteria: root, mode
 + make QuantizedPitchManager for each hfield and hfieldgraph instance in top
   level ofApp.h
 + implement QuantizedPitchManager::processMidiNote()
+
+27. April 2021
++ ~~add two text input fields per HarmonicField on the GUI in order to manager
+  root and mode input~~
++ ~~figure out correct scope to make PitchSetManager from gui. PitchSetManager
+  depends on two input criteria: root, mode~~
 + ~~open midi port for noteins~~
 + ~~fix segfault after integrating unit tests~~
    - ~~eliminate any leftover calls to mock functions in HarmonicFieldGraph~~
 + ~~integrate unit tests~~
-+ get gui to talk to logic structure for segments (selecting harmonies)
-+ fire a tracer bullet and check that you haven't just built a pile of pooh
 
 23. April 2021
 + ~~implement and test getters for Note relative time and probabilty members~~
