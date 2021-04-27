@@ -38,9 +38,7 @@ void ofApp::setup(){
 void ofApp::update(){
 }
 
-//--------------------------------------------------------------
-void ofApp::draw(){
-    // draw midi messages
+void ofApp::drawMidiMessages(){
     for(unsigned int i = 0; i < midiMessages.size(); ++i) {
 
 		ofxMidiMessage &message = midiMessages[i];
@@ -62,6 +60,8 @@ void ofApp::draw(){
 			if(message.status == MIDI_NOTE_ON ||
 			   message.status == MIDI_NOTE_OFF) {
 				text << "\tpitch: " << message.pitch;
+                // this is where we need to make a call to
+                // QuantizePitchManager::processMidiNote(const int &note)
 				ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
 					ofMap(message.pitch, 0, 127, 0, ofGetWidth()*0.2), 10);
 				text << "\tvel: " << message.velocity;
@@ -110,7 +110,12 @@ void ofApp::draw(){
 		ofDrawBitmapString(text.str(), x, y);
 		text.str(""); // clear
 	} // draw midi messages
+}
 
+//--------------------------------------------------------------
+void ofApp::draw(){
+
+    drawMidiMessages(); 
     timespangraph.draw();
     for(auto i = 0; i < hfgrphs.size(); i++){
         hfgrphs[i]->draw();

@@ -23,11 +23,19 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
 
         // Gui setup
         ofxPanel gui;
-        ofParameterGroup sliderGroup;
+        //ofParameterGroup sliderGroup;
         ofParameter<int> hfield1Slider;
+        ofParameter<string> hfield1mode;
+        ofParameter<string> hfield1root;
         ofParameter<int> hfield2Slider;
+        ofParameter<string> hfield2mode;
+        ofParameter<string> hfield2root;
         ofParameter<int> hfield3Slider;
+        ofParameter<string> hfield3mode;
+        ofParameter<string> hfield3root;
         ofParameter<int> hfield4Slider;
+        ofParameter<string> hfield4mode;
+        ofParameter<string> hfield4root;
         ofParameterGroup mainGroup;
 
         TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
@@ -38,6 +46,7 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
         const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
         
         // Midi setup
+        void drawMidiMessages();
         void newMidiMessage(ofxMidiMessage& eventArgs);
         
         ofxMidiIn midiIn;

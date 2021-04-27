@@ -10,11 +10,22 @@
 #include <iterator>
 
 //----------------------------------------------------------------------------
-// constants used for range checking and making default constructors
-namespace constants
-{
-const int GLOBAL_CONST_MIDIMAX { 127 };
-} // namespace constants
+// see near end of file for constants
+
+//----------------------------------------------------------------------------
+// PitchClass and Mode enums: basic elements for all further construction
+//
+enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
+    LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
+    FIVE4, FOUR2, MODECOUNT };
+
+enum PitchClass {
+    c, cs, d, ds, e, f, fs, g, gs, a, as, b
+};
+
+PitchClass operator++(PitchClass& pc);
+PitchClass operator--(PitchClass& pc);
+
 
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
@@ -56,22 +67,28 @@ public:
     void draw();
     void update();
 
+    void updateHarmonicFandFill();
     void updatePoints();
 
     ofParameterGroup params;
     ofParameter<int> x;
     ofParameter<int> y;
+    ofParameter<int> mode;
+    ofParameter<int> root;
 
     vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
     char name;
     TimespanGraph& timespan;
     string toString();
     void setID();
-    int getID();
+    int getID() { return _id; }
     float getWidth() { return _width; }
     int getXPos() { return x; } 
     int getYPos() { return y; }
-    
+    int getMode(){ return mode; }
+    int getRoot(){ return root; }
+    void setFillData(vector<int> &filldata);
+
     float hfxOrigin;
     float localMin;
     float localMax;
@@ -82,19 +99,13 @@ private:
     const float _height = 5.0;
     const int _numtones = 12; // 12 chromatic tones
     int _id;
+    vector<int> _filldata {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 };
 
 //----------------------------------------------------------------------------
 // Pitch and Interval Datatypes 
 //
-
-enum PitchClass {
-    c, cs, d, ds, e, f, fs, g, gs, a, as, b
-};
-
-PitchClass operator++(PitchClass& pc);
-PitchClass operator--(PitchClass& pc);
 
 //----------------------------------------------------------------------------
 //
@@ -179,14 +190,11 @@ private:
 
 struct IntervalSegment {
     // construct using an integer list (number of semitones)
-    IntervalSegment(vector<int> v) : intervals { v }{}
+    IntervalSegment(vector<int> v);
+    IntervalSegment();
     //IntervalSegment(const IntervalSegment& is);
     vector<int> intervals;
 };
-
-enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
-    LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
-    FIVE4, FOUR2, MODECOUNT };
 
 class IntervalSegmentManager{
 
@@ -211,6 +219,7 @@ class PitchSetManager{
 public:
     // Interface class to manage the subset of relevant steps for quantizer
     PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
+    PitchSetManager();
 
     void makePitchClassSet();
     void makePitchSet();
@@ -234,22 +243,20 @@ private:
 class HarmonicField{
 
 public:
-    HarmonicField(vector<NumberedPitch> &pdata) 
-        : _pitchset { pdata } {}
+    HarmonicField(PitchSetManager &psman) 
+        : _psman { psman } {}
 
-    //void setup(); // intialize on opening app, listen to gui
-    //void draw();  // update according to changes from gui 
-    
-    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
+    vector<NumberedPitch> getPitchSet() { return _psman.getPitchSet(); }
+    vector<NumberedPitchClass> getPitchClassSet() { return _psman.getPitchClassSet(); }
 
 private:
-    vector<NumberedPitch> _pitchset;
+    PitchSetManager _psman;
 
 };
 
 
 ////-----------------------------------------------------------------------------
-//// Pitch Quantizer 
+//// HarmonicFieldManager: quantizes pitches according to field attributes
 
 class HarmonicFieldManager{
 
@@ -259,6 +266,7 @@ class HarmonicFieldManager{
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
         int getProb() { return _probability; }
         int getRtime() { return _rtime; }
+        void setFillData();
 
         void setup() { _hfgraph.setup(); }
 
@@ -266,8 +274,10 @@ class HarmonicFieldManager{
         HarmonicField _hfield;
         HarmonicFieldGraph _hfgraph;
         vector<NumberedPitch> _pitchset;
+        vector<NumberedPitchClass> _pitchclassset;
         int _probability;
         int _rtime;    // x position as proportion of timespan
+        vector<int> _filldata {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 };
 
@@ -305,5 +315,14 @@ private:
     vector<HarmonicFieldManager> _vhfm; 
     queue<Note> _notes;
 };
+
+
+//----------------------------------------------------------------------------
+// constants used for range checking and making default constructors
+namespace constants
+{
+const int GLOBAL_CONST_MIDIMAX { 127 };
+const int GLOBAL_CONST_CHROMA  { 12 };
+} // namespace constants
 
 

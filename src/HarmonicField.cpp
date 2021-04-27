@@ -42,11 +42,19 @@ void HarmonicFieldGraph::setup(){
     localMin  = hfxOrigin;
     localMax  = hfxOrigin + length - getWidth(); 
 
+    Mode defaultmode = Mode::MAJOR;
+    PitchClass defaultroot = PitchClass::c;
+
     params.setName(toString());
     params.add(x.set("x", hfxOrigin, localMin, localMax));
     params.add(y.set("y", ofGetHeight() / 2, 0, ofGetHeight())); 
+    params.add(mode.set("MODE", defaultmode, Mode::MAJOR, Mode::FOUR2));
+    params.add(root.set("ROOT", defaultroot, PitchClass::c, PitchClass::b));
 
-    updatePoints();
+    // construct your managers here
+    // send back shading data
+
+    update();
 }
 
 void HarmonicFieldGraph::updatePoints(){
@@ -64,9 +72,19 @@ void HarmonicFieldGraph::updatePoints(){
     }
 }
 
+void HarmonicFieldGraph::updateHarmonicFandFill(){
+    // this should make the 
+}
+
+void HarmonicFieldGraph::update(){
+    updatePoints();
+    updateHarmonicFandFill();
+}
+
+
 void HarmonicFieldGraph::draw(){
 
-    updatePoints();
+    update();
    
     // draw paths according to points
     for(int i = 0; i < (int)keypoints.size(); i++){
@@ -94,8 +112,6 @@ void HarmonicFieldGraph::draw(){
         npath.draw();
     }
 }
-
-void HarmonicFieldGraph::update(){}
 
 string HarmonicFieldGraph::toString(){
     string str = "Hfield ";
@@ -129,7 +145,16 @@ void HarmonicFieldGraph::setID(){
     }
 }
 
-int HarmonicFieldGraph::getID(){ return _id; }
+void HarmonicFieldGraph::setFillData(vector<int> &filldata){
+    for(auto i = 0; i < filldata.size(); i++){
+        if(filldata[i] == 1){
+            _filldata[i] = 1;
+        }
+        else
+            _filldata[i] = 0;
+    }
+    // pass this info to GUI
+}
 
 //----------------------------------------------------------------------------
 // Pitch and Interval Datatypes 
@@ -236,7 +261,13 @@ string Note::toString()
            " prob: " + to_string(getProb()) + '\n';
 }
 
+//-----------------------------------------------------------------------------
+// IntervalSegment
+// Constructors
 
+IntervalSegment::IntervalSegment(){}
+
+IntervalSegment::IntervalSegment(vector<int> v) : intervals { v }{}
 
 //-----------------------------------------------------------------------------
 // Interval segment manager: used to handle the interval distribution needed to
@@ -273,8 +304,26 @@ void IntervalSegmentManager::makeMap() {
 
 //-----------------------------------------------------------------------------
 // Higher level logic classes, factories and managers
-// Manager for pitch sets
+// 
 //
+// PitchSetManager
+// handles construction of pitch and pitch class sets, given ref to root & mode
+
+// Constructors
+//
+PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
+   : _root { root }, _mode { mode } 
+{
+    _minpitchval = (int)root; 
+    makePitchClassSet();
+    makePitchSet();
+} 
+
+PitchSetManager::PitchSetManager() : _mode {} {}
+
+//-----------------------------------------------------------------------------
+// Member Functions
+
 void PitchSetManager::makePitchClassSet()
 // makes a set of pitch classes using the members root and interval segment 
 {
@@ -285,7 +334,6 @@ void PitchSetManager::makePitchClassSet()
         temppc.transpose(_mode.intervals[i]);
         pcset.push_back(temppc); 
     }
-    //TODO: figure out how this compiles, specifically if both copies persist
     _pcset = { pcset }; 
 }
 
@@ -310,28 +358,40 @@ void PitchSetManager::makePitchSet()
 }
 
 ////-----------------------------------------------------------------------------
-
-PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
-   : _root { root }, _mode { mode } 
-{
-    _minpitchval = (int)root; 
-    makePitchClassSet();
-    makePitchSet();
-} 
-
-////-----------------------------------------------------------------------------
-//// HarmonicFieldManager brings together logic 
-//// from HarmonicField and HarmonicFieldGraph in order to make Notes 
+// HarmonicFieldManager 
+//combines logic HarmonicField and HarmonicFieldGraph, makes Notes for output 
 
 HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
     // pitchset is just a reference for the quantizer so it knows what values
     // to use while processing an incoming pitch
-    : _hfield { hfield }, _hfgraph { hfgraph }, _pitchset { hfield.getPitchSet() } 
+    : _hfield { hfield }, 
+      _hfgraph { hfgraph }, 
+      _pitchset { hfield.getPitchSet() }, 
+      _pitchclassset { hfield.getPitchClassSet() }
 {
     _rtime = hfgraph.getXPos();
     _probability = hfgraph.getYPos();
 }
 
+
+void HarmonicFieldManager::setFillData(){
+    // beginning of pipe to harmonic field graph
+    // communicates info on the harmonic instance 
+    
+    // initialize zero shading
+    for(auto i = 0; i < _filldata.size(); i++){
+        _filldata[i] = 0;
+    }
+    int pcindex = 0;
+    // read pitchclasses 
+    for(auto i = 0; i < _pitchclassset.size(); i++){
+        // "turn on" pitchclass shading for whatever pitch classes are present
+        pcindex = _pitchclassset[i].asInt();
+        _filldata[pcindex] = 1; // turn shading on for specific "key" / pitchclass 
+    }
+    // pass this info to GUI
+    _hfgraph.setFillData(_filldata);
+}
 
 ////-----------------------------------------------------------------------------
 
@@ -347,13 +407,11 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
     }
 }
 
-////-----------------------------------------------------------------------------
-////
-
-QuantizedPitchManager::QuantizedPitchManager(){} // default constructor 
-
 //-----------------------------------------------------------------------------
-// Constructor
+// QuantizedPitchManager
+// constructors 
+
+QuantizedPitchManager::QuantizedPitchManager(){} 
 
 QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
     : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
@@ -377,7 +435,7 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 }
 
 //-----------------------------------------------------------------------------
-// Coordinate getters
+// X/Y Coordinate getters
 // usage: gui coordinates contain rhythmic and probabilty info about a note 
 
 int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph

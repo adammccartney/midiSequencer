@@ -32,7 +32,16 @@ for an instrument).
 
 ## Todo
 27. April 2021
-+ fix segfault after integrating unit tests
++ add help menu (work with h key to toggle display of available modes)
++ add two text input fields per HarmonicField on the GUI in order to manager
+  root and mode input
++ figure out correct scope to make PitchSetManager from gui. PitchSetManager
+  depends on two input criteria: root, mode
++ make QuantizedPitchManager for each hfield and hfieldgraph instance in top
+  level ofApp.h
++ implement QuantizedPitchManager::processMidiNote()
++ ~~open midi port for noteins~~
++ ~~fix segfault after integrating unit tests~~
    - ~~eliminate any leftover calls to mock functions in HarmonicFieldGraph~~
 + ~~integrate unit tests~~
 + get gui to talk to logic structure for segments (selecting harmonies)
