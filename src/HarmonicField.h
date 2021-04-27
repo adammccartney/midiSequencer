@@ -3,14 +3,20 @@
 #include "ofMain.h"
 #include <vector>
 #include <map>
+#include <queue>
+#include <chrono>
+#include <algorithm>
+#include <stdexcept>
+#include <iterator>
 
 //----------------------------------------------------------------------------
-// constants
+// constants used for range checking and making default constructors
 
     
 inline extern const int MIDCOFFSET { 60 };
 inline extern const int MIDIMAX { 127 };
 inline extern const int MINFIELDS { 1 };
+inline extern const char DNAME { 'X' };
 
 
 //-----------------------------------------------------------------------------
@@ -55,6 +61,7 @@ class HarmonicFieldGraph{
 
 public:
     HarmonicFieldGraph(char n, TimespanGraph& ts); 
+    HarmonicFieldGraph();
     // compiler generates default destructor
 
     void setup();
@@ -262,8 +269,8 @@ class HarmonicFieldManager{
         HarmonicFieldManager();
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
-        float getProb() { return _probability; }
-        float getRtime() { return _rtime; }
+        int getProb() { return _probability; }
+        int getRtime() { return _rtime; }
 
         void setup() { _hfgraph.setup(); }
 
@@ -271,8 +278,8 @@ class HarmonicFieldManager{
         HarmonicField _hfield;
         HarmonicFieldGraph _hfgraph;
         vector<NumberedPitch> _pitchset;
-        float _probability;
-        float _rtime;    // x position as proportion of timespan
+        int _probability;
+        int _rtime;    // x position as proportion of timespan
 
 };
 
@@ -300,8 +307,8 @@ public:
     Note getNote() { return _notes.front(); }
     void popNote(); 
 
-    float getRval(int n); // gets xcoord of nth harmonic field graph
-    float getProb(int n); // gets ycoord of nth harmonic field graph
+    int getRval(int n); // gets xcoord of nth harmonic field graph
+    int getProb(int n); // gets ycoord of nth harmonic field graph
 
 private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);

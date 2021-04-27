@@ -38,7 +38,7 @@ class ofApp : public ofBaseApp{
         HarmonicFieldGraph hfield3{'c', timespangraph};  
         HarmonicFieldGraph hfield4{'d', timespangraph};
         
-        const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
+        //const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
         
         ofParameterGroup mainGroup;
 

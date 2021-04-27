@@ -31,6 +31,9 @@ which then might do something useful (like make some control messages
 for an instrument). 
 
 ## Todo
+27. April 2021
++ fix segfault after integrating unit tests
+   - eliminate any leftover calls to mock functions in HarmonicFieldGraph 
 
 23. April 2021
 + ~~implement and test getters for Note relative time and probabilty members~~

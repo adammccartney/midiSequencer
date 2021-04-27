@@ -1,5 +1,4 @@
 #include "HarmonicField.h"
-#include <chrono>
 
 //-----------------------------------------------------------------------------
 // Graphics Ćlasses
@@ -32,6 +31,9 @@ HarmonicFieldGraph::HarmonicFieldGraph(char n, TimespanGraph& ts)
 {
     this->setID();
 }
+
+HarmonicFieldGraph::HarmonicFieldGraph()
+    :name{DNAME}, timespan{TSGDEFAULT} {}
 
 //-----------------------------------------------------------------------------
 //
@@ -384,7 +386,7 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 // Coordinate getters
 // usage: gui coordinates contain rhythmic and probabilty info about a note 
 
-float QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
+int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
 {
     if((0 <= n) && (n < _numfields)) // in range, proceed
         return _vhfm[n].getRtime();
@@ -392,7 +394,7 @@ float QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field
         throw std::out_of_range("HField index out of range");
 }
 
-float QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
+int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
 {
     if((0 <= n) && (n < _numfields)) // in range, proceed
         return _vhfm[n].getProb();
