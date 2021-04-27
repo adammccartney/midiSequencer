@@ -33,13 +33,13 @@ for an instrument).
 ## Todo
 27. April 2021
 + fix segfault after integrating unit tests
-   - eliminate any leftover calls to mock functions in HarmonicFieldGraph 
+   - ~~eliminate any leftover calls to mock functions in HarmonicFieldGraph~~
++ ~~integrate unit tests~~
++ get gui to talk to logic structure for segments (selecting harmonies)
++ fire a tracer bullet and check that you haven't just built a pile of pooh
 
 23. April 2021
 + ~~implement and test getters for Note relative time and probabilty members~~
-+ integrate unit tests
-+ get gui to talk to logic structure for segments (selecting harmonies)
-+ fire a tracer bullet and check that you haven't just built a pile of pooh
 
 22. April 2021
 + ~~Figure out what's causing the segfault in the call to

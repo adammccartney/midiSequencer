@@ -206,104 +206,104 @@ private:
 // lifting. 
 //
 
-//class PitchSetManager{
-//
-//public:
-//    // Interface class to manage the subset of relevant steps for quantizer
-//    PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
-//
-//    void makePitchClassSet();
-//    void makePitchSet();
-//
-//    vector<NumberedPitchClass> getPitchClassSet() { return _pcset; }
-//    vector<NumberedPitch> getPitchSet() { return _pitches; }
-//
-//private:    
-//    PitchClass _root;
-//    IntervalSegment _mode;
-//    int _minpitchval;
-//    vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
-//    vector<NumberedPitch> _pitches;       // this holds data for sonic
-//    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120};
-//};
-//
+class PitchSetManager{
+
+public:
+    // Interface class to manage the subset of relevant steps for quantizer
+    PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
+
+    void makePitchClassSet();
+    void makePitchSet();
+
+    vector<NumberedPitchClass> getPitchClassSet() { return _pcset; }
+    vector<NumberedPitch> getPitchSet() { return _pitches; }
+
+private:    
+    PitchClass _root;
+    IntervalSegment _mode;
+    int _minpitchval;
+    vector<NumberedPitchClass> _pcset; // this will hold the info for graphic
+    vector<NumberedPitch> _pitches;       // this holds data for sonic
+    const vector<int> OCTAVE_OFFSETS {0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120};
+};
+
 ////-----------------------------------------------------------------------------
 //// Logic class for Quantizer Fields
 ////
-//
-//class HarmonicField{
-//
-//public:
-//    HarmonicField(vector<NumberedPitch> &pdata) 
-//        : _pitchset { pdata } {}
-//
-//    //void setup(); // intialize on opening app, listen to gui
-//    //void draw();  // update according to changes from gui 
-//    
-//    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
-//
-//private:
-//    vector<NumberedPitch> _pitchset;
-//
-//};
-//
-//
+
+class HarmonicField{
+
+public:
+    HarmonicField(vector<NumberedPitch> &pdata) 
+        : _pitchset { pdata } {}
+
+    //void setup(); // intialize on opening app, listen to gui
+    //void draw();  // update according to changes from gui 
+    
+    const vector<NumberedPitch> getPitchSet() const { return _pitchset; }
+
+private:
+    vector<NumberedPitch> _pitchset;
+
+};
+
+
 ////-----------------------------------------------------------------------------
 //// Pitch Quantizer 
-//
-//class HarmonicFieldManager{
-//
-//    public:
-//        HarmonicFieldManager();
-//        HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
-//        NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
-//        int getProb() { return _probability; }
-//        int getRtime() { return _rtime; }
-//
-//        void setup() { _hfgraph.setup(); }
-//
-//    private:
-//        HarmonicField _hfield;
-//        HarmonicFieldGraph _hfgraph;
-//        vector<NumberedPitch> _pitchset;
-//        int _probability;
-//        int _rtime;    // x position as proportion of timespan
-//
-//};
-//
+
+class HarmonicFieldManager{
+
+    public:
+        HarmonicFieldManager();
+        HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
+        NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
+        int getProb() { return _probability; }
+        int getRtime() { return _rtime; }
+
+        void setup() { _hfgraph.setup(); }
+
+    private:
+        HarmonicField _hfield;
+        HarmonicFieldGraph _hfgraph;
+        vector<NumberedPitch> _pitchset;
+        int _probability;
+        int _rtime;    // x position as proportion of timespan
+
+};
+
 ////-----------------------------------------------------------------------------
 //// Manager for pitch quantizer 
 ////
-//
-//class QuantizedPitchManager{
-//    // Coordinates the incoming and outgoing messages
-//    //
-//public:
-//    QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
-//    QuantizedPitchManager();
-//
-//    void setup() { for(int i = 0; i < numFields(); i++) _vhfm[i].setup(); }
-//    
-//    //void draw();  // create an array of four quantized pitches on the heap
-//                    // make sure these get destroyed once they are sent via osc
-//    
-//    void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
-//    NumberedPitch getOriginalPitch() { return _pitch; }
-//    int numFields(){ return _numfields; }
-//    NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
-//
-//    Note getNote() { return _notes.front(); }
-//    void popNote(); 
-//
-//    int getRval(int n); // gets xcoord of nth harmonic field graph
-//    int getProb(int n); // gets ycoord of nth harmonic field graph
-//
-//private:
-//    Note makeNote(NumberedPitch &p, float &prob, float &rtime);
-//    NumberedPitch _pitch;
-//    int _numfields; // set by size of constructor's vector
-//    vector<HarmonicFieldManager> _vhfm; 
-//    queue<Note> _notes;
-//};
+
+class QuantizedPitchManager{
+    // Coordinates the incoming and outgoing messages
+    //
+public:
+    QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
+    QuantizedPitchManager();
+
+    void setup() { for(int i = 0; i < numFields(); i++) _vhfm[i].setup(); }
+    
+    //void draw();  // create an array of four quantized pitches on the heap
+                    // make sure these get destroyed once they are sent via osc
+    
+    //void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
+    NumberedPitch getOriginalPitch() { return _pitch; }
+    int numFields(){ return _numfields; }
+    NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
+
+    Note getNote() { return _notes.front(); }
+    void popNote(); 
+
+    int getRval(int n); // gets xcoord of nth harmonic field graph
+    int getProb(int n); // gets ycoord of nth harmonic field graph
+
+private:
+    Note makeNote(NumberedPitch &p, float &prob, float &rtime);
+    NumberedPitch _pitch;
+    int _numfields; // set by size of constructor's vector
+    vector<HarmonicFieldManager> _vhfm; 
+    queue<Note> _notes;
+};
 
 

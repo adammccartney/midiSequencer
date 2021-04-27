@@ -275,131 +275,131 @@ void IntervalSegmentManager::makeMap() {
 // Higher level logic classes, factories and managers
 // Manager for pitch sets
 //
-//void PitchSetManager::makePitchClassSet()
-//// makes a set of pitch classes using the members root and interval segment 
-//{
-//    vector<NumberedPitchClass> pcset;
-//    NumberedPitchClass temppc { _root };
-//    pcset.push_back(temppc); // append root first  
-//    for(int i = 0; i < _mode.intervals.size() - 1; i++){ // don't take last step 
-//        temppc.transpose(_mode.intervals[i]);
-//        pcset.push_back(temppc); 
-//    }
-//    //TODO: figure out how this compiles, specifically if both copies persist
-//    _pcset = { pcset }; 
-//}
-//
+void PitchSetManager::makePitchClassSet()
+// makes a set of pitch classes using the members root and interval segment 
+{
+    vector<NumberedPitchClass> pcset;
+    NumberedPitchClass temppc { _root };
+    pcset.push_back(temppc); // append root first  
+    for(int i = 0; i < _mode.intervals.size() - 1; i++){ // don't take last step 
+        temppc.transpose(_mode.intervals[i]);
+        pcset.push_back(temppc); 
+    }
+    //TODO: figure out how this compiles, specifically if both copies persist
+    _pcset = { pcset }; 
+}
+
 ////-----------------------------------------------------------------------------
 ////
-//
-//void PitchSetManager::makePitchSet()
-//// makes a set of pitches across a span of 10 octaves using the member pitchset
-//{
-//    int offset = 0;
-//    int pitchval = 0;
-//    vector<NumberedPitch> npv;
-//    for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
-//        for(int j = 0; j < _pcset.size(); j++){ 
-//            offset = OCTAVE_OFFSETS[i];
-//            pitchval = _pcset[j].asInt() + offset;
-//            NumberedPitch np { pitchval };
-//            npv.push_back(np);
-//        }
-//    }
-//   _pitches = { npv }; 
-//}
-//
+
+void PitchSetManager::makePitchSet()
+// makes a set of pitches across a span of 10 octaves using the member pitchset
+{
+    int offset = 0;
+    int pitchval = 0;
+    vector<NumberedPitch> npv;
+    for(int i = 0; i < OCTAVE_OFFSETS.size(); i++){
+        for(int j = 0; j < _pcset.size(); j++){ 
+            offset = OCTAVE_OFFSETS[i];
+            pitchval = _pcset[j].asInt() + offset;
+            NumberedPitch np { pitchval };
+            npv.push_back(np);
+        }
+    }
+   _pitches = { npv }; 
+}
+
 ////-----------------------------------------------------------------------------
-//
-//PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
-//   : _root { root }, _mode { mode } 
-//{
-//    _minpitchval = (int)root; 
-//    makePitchClassSet();
-//    makePitchSet();
-//} 
-//
+
+PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
+   : _root { root }, _mode { mode } 
+{
+    _minpitchval = (int)root; 
+    makePitchClassSet();
+    makePitchSet();
+} 
+
 ////-----------------------------------------------------------------------------
 //// HarmonicFieldManager brings together logic 
 //// from HarmonicField and HarmonicFieldGraph in order to make Notes 
-//
-//HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
-//    // pitchset is just a reference for the quantizer so it knows what values
-//    // to use while processing an incoming pitch
-//    : _hfield { hfield }, _hfgraph { hfgraph }, _pitchset { hfield.getPitchSet() } 
-//{
-//    _rtime = hfgraph.getXPos();
-//    _probability = hfgraph.getYPos();
-//}
-//
-//
+
+HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
+    // pitchset is just a reference for the quantizer so it knows what values
+    // to use while processing an incoming pitch
+    : _hfield { hfield }, _hfgraph { hfgraph }, _pitchset { hfield.getPitchSet() } 
+{
+    _rtime = hfgraph.getXPos();
+    _probability = hfgraph.getYPos();
+}
+
+
 ////-----------------------------------------------------------------------------
-//
-//NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
-//    
-//    auto p = find(_pitchset.begin(), _pitchset.end(), inpitch);
-//    if(p != _pitchset.end()){
-//        return *p;
-//    }
-//    else{
-//        inpitch.transpose(+1);
-//        return getQuantizedPitch(inpitch);
-//    }
-//}
-//
-////-----------------------------------------------------------------------------
-////
-//
-//QuantizedPitchManager::QuantizedPitchManager(){} // default constructor 
-//
-////-----------------------------------------------------------------------------
-//// Constructor
-//
-//QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
-//    : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
-//{
-//    for(int i = 0; i < _numfields; i++)
-//    {
-//        _vhfm.push_back(vhfm[i]);
-//    }
-//}
-//
+
+NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
+    
+    auto p = find(_pitchset.begin(), _pitchset.end(), inpitch);
+    if(p != _pitchset.end()){
+        return *p;
+    }
+    else{
+        inpitch.transpose(+1);
+        return getQuantizedPitch(inpitch);
+    }
+}
+
 ////-----------------------------------------------------------------------------
 ////
+
+QuantizedPitchManager::QuantizedPitchManager(){} // default constructor 
+
+//-----------------------------------------------------------------------------
+// Constructor
+
+QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
+    : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
+{
+    for(int i = 0; i < _numfields; i++)
+    {
+        _vhfm.push_back(vhfm[i]);
+    }
+}
+
+//-----------------------------------------------------------------------------
 //
-//NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitch p)
-//// calls the get QuantizedPitch function of a specific hfield
-//// returns quantized pitch
-//{
-//    NumberedPitch qp;
-//    qp.setPitch(_vhfm[hfindex].getQuantizedPitch(p));
-//    return qp;
-//}
-//
-////-----------------------------------------------------------------------------
-//// Coordinate getters
-//// usage: gui coordinates contain rhythmic and probabilty info about a note 
-//
-//int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
-//{
-//    if((0 <= n) && (n < _numfields)) // in range, proceed
-//        return _vhfm[n].getRtime();
-//    else
-//        throw std::out_of_range("HField index out of range");
-//}
-//
-//int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
-//{
-//    if((0 <= n) && (n < _numfields)) // in range, proceed
-//        return _vhfm[n].getProb();
-//    else
-//        throw std::out_of_range("HField index out of range");
-//}
-//
-////-----------------------------------------------------------------------------
-//// Here the incoming midi note is quantized and pushed to the stack of notes in
-//// the object
-//
+
+NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitch p)
+// calls the get QuantizedPitch function of a specific hfield
+// returns quantized pitch
+{
+    NumberedPitch qp;
+    qp.setPitch(_vhfm[hfindex].getQuantizedPitch(p));
+    return qp;
+}
+
+//-----------------------------------------------------------------------------
+// Coordinate getters
+// usage: gui coordinates contain rhythmic and probabilty info about a note 
+
+int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
+{
+    if((0 <= n) && (n < _numfields)) // in range, proceed
+        return _vhfm[n].getRtime();
+    else
+        throw std::out_of_range("HField index out of range");
+}
+
+int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
+{
+    if((0 <= n) && (n < _numfields)) // in range, proceed
+        return _vhfm[n].getProb();
+    else
+        throw std::out_of_range("HField index out of range");
+}
+
+//-----------------------------------------------------------------------------
+// Here the incoming midi note is quantized and pushed to the stack of notes in
+// the object
+
 //void QuantizedPitchManager::processMidiNote(const int &midiVal)
 //{
 //    // quantized pitches are pushed on to a FiFo stack // queue 
@@ -451,11 +451,11 @@ void IntervalSegmentManager::makeMap() {
 //    //    _notes.push(n);
 //    //}
 //}
-//
-//
-//void QuantizedPitchManager::popNote()
-//{
-//    _notes.pop();
-//}
-//
+
+
+void QuantizedPitchManager::popNote()
+{
+    _notes.pop();
+}
+
 
