@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "HarmonicField.h"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -25,12 +26,29 @@ void ofApp::setup(){
     // print received messages to the console
 	midiIn.setVerbose(true);
 
-	// print received messages to the console
-    for(auto i = 0; i < hfgrphs.size(); i++){
+    //int tmpmode, tmproot;
+    for(auto i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
         // set up some naming conventions for hfield parameters
         hfgrphs[i]->setup();
+
+        // use info from gui to update logic
+        //tmpmode = hfgrphs[i]->getMode();
+        //tmproot = hfgrphs[i]->getRoot();
+        
+        //auto root = PitchClass(tmproot);
+        //auto mode = Mode(tmpmode);
+        // first make segment
+        //intseg[i]->intervals = intsegman.modeIntervalMap[mode];
+        // use segment to make PitchSets
+        //psmanager[i]->init(root, *intseg[i]);
+        // update logic from 
+        //hfields[i]->init(*psmanager[i]);
+        // unify pitchset data with GUI data 
+        //hfmanager[i]->init(*hfields[i], *hfgrphs[i]);
+
         mainGroup.add(hfgrphs[i]->params);
     }
+    // send back shading data
     gui.setup(mainGroup);
 }
 

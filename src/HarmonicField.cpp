@@ -14,7 +14,10 @@ TimespanGraph::TimespanGraph(const int numharmonicfields)
     _len     = _start.distance(_end);
 }
 
-float TimespanGraph::getLength(){ return _len; }
+TimespanGraph::TimespanGraph()
+    : numhfields { constants::GLOBAL_CONST_NUM_HFIELDS} {}
+
+float TimespanGraph::getLength() const { return _len; }
 
 void TimespanGraph::draw(){
     ofDrawLine(_start.x, _start.y, _end.x, _end.y);
@@ -28,6 +31,10 @@ HarmonicFieldGraph::HarmonicFieldGraph(char n, TimespanGraph& ts)
 {
     this->setID();
 }
+
+HarmonicFieldGraph::HarmonicFieldGraph()
+    : name { constants::GLOBAL_CONST_HFGNAME}, 
+      timespan { constants::GLOBAL_CONST_DEFTIMESPAN } {}
 
 //-----------------------------------------------------------------------------
 //
@@ -51,8 +58,6 @@ void HarmonicFieldGraph::setup(){
     params.add(mode.set("MODE", defaultmode, Mode::MAJOR, Mode::FOUR2));
     params.add(root.set("ROOT", defaultroot, PitchClass::c, PitchClass::b));
 
-    // construct your managers here
-    // send back shading data
 
     update();
 }
@@ -81,13 +86,12 @@ void HarmonicFieldGraph::update(){
     updateHarmonicFandFill();
 }
 
-
 void HarmonicFieldGraph::draw(){
 
     update();
    
     // draw paths according to points
-    for(int i = 0; i < (int)keypoints.size(); i++){
+    for(int i = 0; i < constants::GLOBAL_CONST_CHROMA; i++){  // 12 chrom steps
         ofPath npath;
         npath.moveTo(keypoints[i][0]);
         npath.lineTo(keypoints[i][1]);
@@ -95,18 +99,19 @@ void HarmonicFieldGraph::draw(){
         npath.lineTo(keypoints[i][3]);
         npath.close(); 
         // color according to piano keyboard
-        PitchClass x = (PitchClass)i;
+        PitchClass x = (PitchClass)i; 
+        
         if((x == PitchClass::cs) || (x == PitchClass::ds) || 
                 (x == PitchClass::fs) || (x == PitchClass::gs) || 
                 (x == PitchClass::as)){
             npath.setStrokeColor(ofColor::black);
             npath.setFillColor(ofColor::black);
-            npath.setFilled(true);
-            npath.setStrokeWidth(2);
+            npath.setFilled(_filldata[i]); // visualizes harmonic info 
+            npath.setStrokeWidth(2); 
         }else{
-            npath.setStrokeColor(ofColor::black);
+            npath.setStrokeColor(ofColor::white);
             npath.setFillColor(ofColor::white);
-            npath.setFilled(true);
+            npath.setFilled(_filldata[i]);
             npath.setStrokeWidth(2);
         }
         npath.draw();
@@ -148,10 +153,10 @@ void HarmonicFieldGraph::setID(){
 void HarmonicFieldGraph::setFillData(vector<int> &filldata){
     for(auto i = 0; i < filldata.size(); i++){
         if(filldata[i] == 1){
-            _filldata[i] = 1;
+            _filldata[i] = true;
         }
         else
-            _filldata[i] = 0;
+            _filldata[i] = false;
     }
     // pass this info to GUI
 }
@@ -311,7 +316,7 @@ void IntervalSegmentManager::makeMap() {
 
 // Constructors
 //
-PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &mode)
+PitchSetManager::PitchSetManager(PitchClass &root, IntervalSegment &mode)
    : _root { root }, _mode { mode } 
 {
     _minpitchval = (int)root; 
@@ -320,6 +325,33 @@ PitchSetManager::PitchSetManager(const PitchClass &root, const IntervalSegment &
 } 
 
 PitchSetManager::PitchSetManager() : _mode {} {}
+
+PitchSetManager::PitchSetManager(const PitchSetManager& n)
+    : _root { n._root }, _mode { n._mode }
+{
+    _minpitchval = (int)n._root;
+    makePitchClassSet();
+    makePitchSet();
+}
+
+PitchSetManager& PitchSetManager::operator=(const PitchSetManager& n)
+{
+    _root =  n._root;
+    _mode = n._mode;
+    _minpitchval = (int)n._root;
+    makePitchClassSet();
+    makePitchSet();
+    return *this;
+}
+
+void PitchSetManager::init(PitchClass &root, IntervalSegment &intseg)
+{
+    setRoot(root);
+    setIntseg(intseg);
+    _minpitchval = (int)root;
+    makePitchClassSet();
+    makePitchSet();
+}
 
 //-----------------------------------------------------------------------------
 // Member Functions
@@ -357,7 +389,12 @@ void PitchSetManager::makePitchSet()
    _pitches = { npv }; 
 }
 
-////-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// HarmonicField
+
+HarmonicField::HarmonicField(){}
+
+//-----------------------------------------------------------------------------
 // HarmonicFieldManager 
 //combines logic HarmonicField and HarmonicFieldGraph, makes Notes for output 
 
@@ -373,6 +410,13 @@ HarmonicFieldManager::HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldG
     _probability = hfgraph.getYPos();
 }
 
+HarmonicFieldManager::HarmonicFieldManager(){}
+
+void HarmonicFieldManager::init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
+{
+    _pitchset = hfield.getPitchSet(); 
+    _pitchclassset = hfield.getPitchClassSet();
+}
 
 void HarmonicFieldManager::setFillData(){
     // beginning of pipe to harmonic field graph

@@ -37,13 +37,14 @@ class TimespanGraph{
 public:
 
    TimespanGraph(const int numharmonicfields);
+   TimespanGraph();
    // compiler generates default destructor
 
    void draw();
 
-   float getLength();
-   ofVec2f getStart() { return _start; }
-   ofVec2f getEnd() { return _end; }
+   float getLength() const;
+   ofVec2f getStart() const { return _start; }
+   ofVec2f getEnd() const { return _end; }
 
    const int numhfields;
 
@@ -61,6 +62,7 @@ class HarmonicFieldGraph{
 
 public:
     HarmonicFieldGraph(char n, TimespanGraph& ts); 
+    HarmonicFieldGraph();
     // compiler generates default destructor
 
     void setup();
@@ -78,7 +80,7 @@ public:
 
     vector<vector<ofVec2f>> keypoints; // a (pianoroll) key has 4 ofVec2f pts 
     char name;
-    TimespanGraph& timespan;
+    const TimespanGraph& timespan;
     string toString();
     void setID();
     int getID() { return _id; }
@@ -99,7 +101,8 @@ private:
     const float _height = 5.0;
     const int _numtones = 12; // 12 chromatic tones
     int _id;
-    vector<int> _filldata {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    vector<bool> _filldata {false, false, false, false, false, false, 
+        false, false, false, false, false, false};
 
 };
 
@@ -218,9 +221,15 @@ class PitchSetManager{
 
 public:
     // Interface class to manage the subset of relevant steps for quantizer
-    PitchSetManager(const PitchClass &root, const IntervalSegment &mode);
+    PitchSetManager(PitchClass &root, IntervalSegment &mode);
     PitchSetManager();
+    // define copy constructor
+    PitchSetManager(const PitchSetManager& n); // copy constructor 
+    PitchSetManager& operator=(const PitchSetManager& n);
 
+    void setRoot(PitchClass &root) { _root = root; }
+    void setIntseg(IntervalSegment &mode) { _mode = mode; }
+    void init(PitchClass &root, IntervalSegment &intseg);
     void makePitchClassSet();
     void makePitchSet();
 
@@ -245,6 +254,9 @@ class HarmonicField{
 public:
     HarmonicField(PitchSetManager &psman) 
         : _psman { psman } {}
+    HarmonicField();
+
+    //void init(PitchSetManager &psman) { _psman = psman; }
 
     vector<NumberedPitch> getPitchSet() { return _psman.getPitchSet(); }
     vector<NumberedPitchClass> getPitchClassSet() { return _psman.getPitchClassSet(); }
@@ -261,12 +273,13 @@ private:
 class HarmonicFieldManager{
 
     public:
-        HarmonicFieldManager();
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
+        HarmonicFieldManager();
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
         int getProb() { return _probability; }
         int getRtime() { return _rtime; }
         void setFillData();
+        void init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
 
         void setup() { _hfgraph.setup(); }
 
@@ -323,6 +336,9 @@ namespace constants
 {
 const int GLOBAL_CONST_MIDIMAX { 127 };
 const int GLOBAL_CONST_CHROMA  { 12 };
+const int GLOBAL_CONST_NUM_HFIELDS { 4 };
+const TimespanGraph GLOBAL_CONST_DEFTIMESPAN {};
+const char GLOBAL_CONST_HFGNAME { 'X' };
 } // namespace constants
 
 

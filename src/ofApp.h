@@ -23,7 +23,6 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
 
         // Gui setup
         ofxPanel gui;
-        //ofParameterGroup sliderGroup;
         ofParameter<int> hfield1Slider;
         ofParameter<string> hfield1mode;
         ofParameter<string> hfield1root;
@@ -38,13 +37,36 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
         ofParameter<string> hfield4root;
         ofParameterGroup mainGroup;
 
-        TimespanGraph timespangraph{4};  // timespangraph with 4 subsections (harmonic fields)
-        HarmonicFieldGraph hfield1{'a', timespangraph}; 
-        HarmonicFieldGraph hfield2{'b', timespangraph};  
-        HarmonicFieldGraph hfield3{'c', timespangraph};  
-        HarmonicFieldGraph hfield4{'d', timespangraph};
-        const vector <HarmonicFieldGraph*> hfgrphs {&hfield1, &hfield2, &hfield3, &hfield4} ;
-        
+        // Setup harmonic field graphs and harmonic fields
+        TimespanGraph timespangraph{constants::GLOBAL_CONST_NUM_HFIELDS};  // timespangraph with 4 subsections (harmonic fields)
+        HarmonicFieldGraph hfgraph1{'a', timespangraph}; 
+        HarmonicFieldGraph hfgraph2{'b', timespangraph};  
+        HarmonicFieldGraph hfgraph3{'c', timespangraph};  
+        HarmonicFieldGraph hfgraph4{'d', timespangraph};
+        const vector <HarmonicFieldGraph*> hfgrphs {&hfgraph1, &hfgraph2, &hfgraph3, &hfgraph4} ;
+        HarmonicField hfield1;
+        HarmonicField hfield2;
+        HarmonicField hfield3;
+        HarmonicField hfield4;
+        const vector <HarmonicField*> hfields {&hfield1, &hfield2, &hfield3, &hfield4}; 
+        IntervalSegmentManager intsegman;
+        IntervalSegment intseg1;
+        IntervalSegment intseg2;
+        IntervalSegment intseg3;
+        IntervalSegment intseg4;
+        const vector <IntervalSegment*> intseg {&intseg1, &intseg2, &intseg3, &intseg4}; 
+        PitchSetManager psman1;
+        PitchSetManager psman2;
+        PitchSetManager psman3;
+        PitchSetManager psman4;
+        const vector <PitchSetManager*> psmanager {&psman1, &psman2, &psman3, &psman4}; 
+        HarmonicFieldManager hfman1;
+        HarmonicFieldManager hfman2;
+        HarmonicFieldManager hfman3;
+        HarmonicFieldManager hfman4;
+        const vector <HarmonicFieldManager*> hfmanager {&hfman1, &hfman2, &hfman3, &hfman4};
+
+
         // Midi setup
         void drawMidiMessages();
         void newMidiMessage(ofxMidiMessage& eventArgs);
