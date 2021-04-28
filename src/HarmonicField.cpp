@@ -77,13 +77,8 @@ void HarmonicFieldGraph::updatePoints(){
     }
 }
 
-void HarmonicFieldGraph::updateHarmonicFandFill(){
-    // this should make the 
-}
-
 void HarmonicFieldGraph::update(){
     updatePoints();
-    updateHarmonicFandFill();
 }
 
 void HarmonicFieldGraph::draw(){
@@ -150,7 +145,7 @@ void HarmonicFieldGraph::setID(){
     }
 }
 
-void HarmonicFieldGraph::setFillData(vector<int> &filldata){
+void HarmonicFieldGraph::setFillData(const vector<int> &filldata){
     for(auto i = 0; i < filldata.size(); i++){
         if(filldata[i] == 1){
             _filldata[i] = true;

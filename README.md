@@ -33,11 +33,11 @@ for an instrument).
 ## Todo
 
 28. April 2021
-+ get gui to talk to logic structure for segments (selecting harmonies)
++ ~~get gui to talk to logic structure for segments (selecting harmonies)~~
 + fire a tracer bullet and check that you haven't just built a pile of pooh
 + add help menu (work with h key to toggle display of available modes)
-+ make QuantizedPitchManager for each hfield and hfieldgraph instance in top
-  level ofApp.h
++ ~~make QuantizedPitchManager for each hfield and hfieldgraph instance in top
+  level ofApp.h~~
 + implement QuantizedPitchManager::processMidiNote()
 
 27. April 2021

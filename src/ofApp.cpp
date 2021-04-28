@@ -26,26 +26,9 @@ void ofApp::setup(){
     // print received messages to the console
 	midiIn.setVerbose(true);
 
-    //int tmpmode, tmproot;
     for(auto i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
         // set up some naming conventions for hfield parameters
         hfgrphs[i]->setup();
-
-        // use info from gui to update logic
-        //tmpmode = hfgrphs[i]->getMode();
-        //tmproot = hfgrphs[i]->getRoot();
-        
-        //auto root = PitchClass(tmproot);
-        //auto mode = Mode(tmpmode);
-        // first make segment
-        //intseg[i]->intervals = intsegman.modeIntervalMap[mode];
-        // use segment to make PitchSets
-        //psmanager[i]->init(root, *intseg[i]);
-        // update logic from 
-        //hfields[i]->init(*psmanager[i]);
-        // unify pitchset data with GUI data 
-        //hfmanager[i]->init(*hfields[i], *hfgrphs[i]);
-
         mainGroup.add(hfgrphs[i]->params);
     }
     // send back shading data
@@ -54,6 +37,26 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+
+    int tmpmode, tmproot;
+    for(auto i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
+        // use info from gui to update logic
+        tmpmode = hfgrphs[i]->getMode();
+        tmproot = hfgrphs[i]->getRoot();
+        
+        auto root = PitchClass(tmproot);
+        auto mode = Mode(tmpmode);
+        // first make segment
+        intseg[i]->intervals = intsegman.modeIntervalMap[mode];
+        // use segment to make PitchSets
+        psmanager[i]->init(root, *intseg[i]);
+        // update logic from 
+        hfields[i]->init(*psmanager[i]);
+        // unify pitchset data with GUI data 
+        hfmanager[i]->init(*hfields[i], *hfgrphs[i]);
+        hfmanager[i]->setFillData();
+        hfgrphs[i]->setFillData(hfmanager[i]->getFillData());
+    }
 }
 
 void ofApp::drawMidiMessages(){

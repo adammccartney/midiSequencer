@@ -89,7 +89,7 @@ public:
     int getYPos() { return y; }
     int getMode(){ return mode; }
     int getRoot(){ return root; }
-    void setFillData(vector<int> &filldata);
+    void setFillData(const vector<int> &filldata);
 
     float hfxOrigin;
     float localMin;
@@ -256,7 +256,7 @@ public:
         : _psman { psman } {}
     HarmonicField();
 
-    //void init(PitchSetManager &psman) { _psman = psman; }
+    void init(PitchSetManager &psman) { _psman = psman; }
 
     vector<NumberedPitch> getPitchSet() { return _psman.getPitchSet(); }
     vector<NumberedPitchClass> getPitchClassSet() { return _psman.getPitchClassSet(); }
@@ -279,6 +279,7 @@ class HarmonicFieldManager{
         int getProb() { return _probability; }
         int getRtime() { return _rtime; }
         void setFillData();
+        vector<int> getFillData() { return _filldata;  }
         void init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
 
         void setup() { _hfgraph.setup(); }
