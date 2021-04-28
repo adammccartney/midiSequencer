@@ -4,6 +4,20 @@
 #include "ofxGui.h"
 #include "HarmonicField.h"
 #include "ofxMidi.h"
+#include "ofxOsc.h"
+
+//----------------------------------------------------------------------------
+// Setup for Osc, define socket info
+
+// send host (aka IP address) 
+#define HOST "localhost"
+
+// send port
+#define PORT 12345
+
+//----------------------------------------------------------------------------
+// The app takes a midi note in, processes by sending through four harmonic
+// fields that quantize the original pitch according to their parameters
 
 class ofApp : public ofBaseApp, public ofxMidiListener {
 
@@ -74,4 +88,7 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
         ofxMidiIn midiIn;
         std::vector<ofxMidiMessage> midiMessages;
         std::size_t maxMessages = 10; //< max number of messages to keep track of
+
+        // Osc setup
+        ofxOscSender sender;
 };

@@ -26,6 +26,9 @@ void ofApp::setup(){
     // print received messages to the console
 	midiIn.setVerbose(true);
 
+    // open an outgoing connection to HOST:PORT
+    sender.setup(HOST, PORT);
+
     for(auto i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
         // set up some naming conventions for hfield parameters
         hfgrphs[i]->setup();
@@ -82,8 +85,8 @@ void ofApp::drawMidiMessages(){
 			if(message.status == MIDI_NOTE_ON ||
 			   message.status == MIDI_NOTE_OFF) {
 				text << "\tpitch: " << message.pitch;
-                // this is where we need to make a call to
-                // QuantizedPitchManager::processMidiNote(const int &note)
+                // this is where we create the outgoing notes
+                qpmanager.processMidiNote(message.pitch);
 				ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
 					ofMap(message.pitch, 0, 127, 0, ofGetWidth()*0.2), 10);
 				text << "\tvel: " << message.velocity;

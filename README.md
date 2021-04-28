@@ -32,13 +32,18 @@ for an instrument).
 
 ## Todo
 
-28. April 2021
-+ ~~get gui to talk to logic structure for segments (selecting harmonies)~~
+29. April 2021
++ ~~set up Osc routing~~
++ design Osc message, call is going to happen at the end of processMidiNote(), 
+  as we need to access the Note queue that is a member of that object
 + fire a tracer bullet and check that you haven't just built a pile of pooh
 + add help menu (work with h key to toggle display of available modes)
+
+28. April 2021
++ ~~get gui to talk to logic structure for segments (selecting harmonies)~~
 + ~~make QuantizedPitchManager for each hfield and hfieldgraph instance in top
   level ofApp.h~~
-+ implement QuantizedPitchManager::processMidiNote()
++ ~~implement QuantizedPitchManager::processMidiNote()~~
 
 27. April 2021
 + ~~add two text input fields per HarmonicField on the GUI in order to manager
