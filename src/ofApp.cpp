@@ -57,6 +57,7 @@ void ofApp::update(){
         hfmanager[i]->setFillData();
         hfgrphs[i]->setFillData(hfmanager[i]->getFillData());
     }
+    
 }
 
 void ofApp::drawMidiMessages(){
@@ -82,7 +83,7 @@ void ofApp::drawMidiMessages(){
 			   message.status == MIDI_NOTE_OFF) {
 				text << "\tpitch: " << message.pitch;
                 // this is where we need to make a call to
-                // QuantizePitchManager::processMidiNote(const int &note)
+                // QuantizedPitchManager::processMidiNote(const int &note)
 				ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
 					ofMap(message.pitch, 0, 127, 0, ofGetWidth()*0.2), 10);
 				text << "\tvel: " << message.velocity;

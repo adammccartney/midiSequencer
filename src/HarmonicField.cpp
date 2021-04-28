@@ -409,7 +409,7 @@ HarmonicFieldManager::HarmonicFieldManager(){}
 
 void HarmonicFieldManager::init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
 {
-    _pitchset = hfield.getPitchSet(); 
+    _pitchset = hfield.getPitchSet();
     _pitchclassset = hfield.getPitchClassSet();
 }
 
@@ -428,7 +428,7 @@ void HarmonicFieldManager::setFillData(){
         pcindex = _pitchclassset[i].asInt();
         _filldata[pcindex] = 1; // turn shading on for specific "key" / pitchclass 
     }
-    // pass this info to GUI
+    // display the keys shaded according to tonality
     _hfgraph.setFillData(_filldata);
 }
 
@@ -452,14 +452,9 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
 
 QuantizedPitchManager::QuantizedPitchManager(){} 
 
-QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager> &vhfm)
-    : _numfields { (int)vhfm.size() } // syntax possibly a crime against humanity
-{
-    for(int i = 0; i < _numfields; i++)
-    {
-        _vhfm.push_back(vhfm[i]);
-    }
-}
+QuantizedPitchManager::QuantizedPitchManager(const vector<HarmonicFieldManager*> &vhfm)
+    : _numfields { constants::GLOBAL_CONST_NUM_HFIELDS }, _vhfm { vhfm } {}
+
 
 //-----------------------------------------------------------------------------
 //
@@ -469,7 +464,7 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 // returns quantized pitch
 {
     NumberedPitch qp;
-    qp.setPitch(_vhfm[hfindex].getQuantizedPitch(p));
+    qp.setPitch(_vhfm[hfindex]->getQuantizedPitch(p));
     return qp;
 }
 
@@ -480,7 +475,7 @@ NumberedPitch QuantizedPitchManager::getQuantizedPitch(int hfindex, NumberedPitc
 int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field graph
 {
     if((0 <= n) && (n < _numfields)) // in range, proceed
-        return _vhfm[n].getRtime();
+        return _vhfm[n]->getRtime();
     else
         throw std::out_of_range("HField index out of range");
 }
@@ -488,7 +483,7 @@ int QuantizedPitchManager::getRval(int n) // gets xcoord of nth harmonic field g
 int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field graph
 {
     if((0 <= n) && (n < _numfields)) // in range, proceed
-        return _vhfm[n].getProb();
+        return _vhfm[n]->getProb();
     else
         throw std::out_of_range("HField index out of range");
 }
@@ -497,57 +492,24 @@ int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field g
 // Here the incoming midi note is quantized and pushed to the stack of notes in
 // the object
 
-//void QuantizedPitchManager::processMidiNote(const int &midiVal)
-//{
-//    // quantized pitches are pushed on to a FiFo stack // queue 
-//    // quantizers work in a pipeline and modify pitch continuously 
-//    // q1 = quantize(p1) 
-//    // q2 = quantize(q1)
-//    // q3 = quantize(q2)
-//    // q4 = quantize(q3)
-//    NumberedPitch np { midiVal }; 
-//    _pitch = NumberedPitch { np } ; // set this as our starting pitch
-//    NumberedPitch qp0, qp1, qp2, qp3;
-//    
-//    float rval0, rval1, rval2, rval3;
-//    float prob0, prob1, prob2, prob3;
-//    qp0 = getQuantizedPitch(0, np); // start with incoming pitch at index 0
-//    rval0 = getRval(0);
-//    prob0 = getProb(0);
-//    Note n0 { qp0, rval0, prob0 };
-//    _notes.push(n0);
-//    qp1 = getQuantizedPitch(1, qp0);
-//    rval1 = getRval(1);
-//    prob1 = getProb(1);
-//    Note n1 { qp1, rval1, prob1 };
-//    _notes.push(n1);
-//    qp2 = getQuantizedPitch(2, qp1);
-//    rval2 = getRval(2);
-//    prob2 = getProb(2);
-//    Note n2 { qp2, rval2, prob2 };
-//    _notes.push(n2);
-//    qp3 = getQuantizedPitch(3, qp2);
-//    rval3 = getRval(2);
-//    prob3 = getProb(2);
-//    Note n3 { qp3, rval3, prob3 };
-//    _notes.push(n3);
-//
-//
-//    // TODO: fix the segfault in this loop, 
-//    // likely cause is trying to access an address that's out of range
-//    // it should be possible to wrap the above logic 
-//    // in a for loop along the following lines:
-//    //vector<NumberedPitch> qpitches { np, qp0, qp1, qp2, qp3 };
-//    //vector<float> rvals;
-//    //vector<float> probs;
-//    //for(int i = 0; i < qpitches.size(); i++){
-//    //    qpitches[i + 1] = getQuantizedPitch(i, qpitches[i]); 
-//    //    rvals[i] = getRval(i);
-//    //    probs[i] = getProb(i);
-//    //    Note n { qpitches[i+1], rvals[i], probs[i] };
-//    //    _notes.push(n);
-//    //}
-//}
+
+void QuantizedPitchManager::processMidiNote(const int &midiVal)
+{
+    NumberedPitch tmp { midiVal };
+    _pitch = NumberedPitch { tmp } ; // set this as our starting pitch
+   
+    vector<float> rvals;
+    vector<float> probs;
+    NumberedPitch qp;
+    for(int i = 0; i < 4; i++){ // magic constant replaced in main program
+        qp.setPitch(getQuantizedPitch(i, tmp)); 
+        rvals.push_back(getRval(i));
+        probs.push_back(getProb(i));
+        Note n { qp, rvals[i], probs[i] };
+        _notes.push(n);
+        tmp.setPitch(qp);
+    }
+}
 
 
 void QuantizedPitchManager::popNote()

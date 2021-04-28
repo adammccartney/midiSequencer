@@ -425,51 +425,20 @@ float QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field
 
 void QuantizedPitchManager::processMidiNote(const int &midiVal)
 {
-    // quantized pitches are pushed on to a FiFo stack // queue 
-    // quantizers work in a pipeline and modify pitch continuously 
-    // q1 = quantize(p1) 
-    // q2 = quantize(q1)
-    // q3 = quantize(q2)
-    // q4 = quantize(q3)
-    NumberedPitch np { midiVal }; 
-    _pitch = NumberedPitch { np } ; // set this as our starting pitch
-    NumberedPitch qp0, qp1, qp2, qp3;
-    
-    float rval0, rval1, rval2, rval3;
-    float prob0, prob1, prob2, prob3;
-    qp0 = getQuantizedPitch(0, np); // start with incoming pitch at index 0
-    rval0 = getRval(0);
-    prob0 = getProb(0);
-    Note n0 { qp0, rval0, prob0 };
-    _notes.push(n0);
-    qp1 = getQuantizedPitch(1, qp0);
-    rval1 = getRval(1);
-    prob1 = getProb(1);
-    Note n1 { qp1, rval1, prob1 };
-    _notes.push(n1);
-    qp2 = getQuantizedPitch(2, qp1);
-    rval2 = getRval(2);
-    prob2 = getProb(2);
-    Note n2 { qp2, rval2, prob2 };
-    _notes.push(n2);
-    qp3 = getQuantizedPitch(3, qp2);
-    rval3 = getRval(2);
-    prob3 = getProb(2);
-    Note n3 { qp3, rval3, prob3 };
-    _notes.push(n3);
-
-
-    // TODO: fix the segfault in this loop
-    //vector<NumberedPitch> qpitches { np, qp0, qp1, qp2, qp3 };
-    //vector<float> rvals;
-    //vector<float> probs;
-    //for(int i = 0; i < qpitches.size(); i++){
-    //    qpitches[i + 1] = getQuantizedPitch(i, qpitches[i]); 
-    //    rvals[i] = getRval(i);
-    //    probs[i] = getProb(i);
-    //    Note n { qpitches[i+1], rvals[i], probs[i] };
-    //    _notes.push(n);
-    //}
+    NumberedPitch tmp { midiVal };
+    _pitch = NumberedPitch { tmp } ; // set this as our starting pitch
+   
+    vector<float> rvals;
+    vector<float> probs;
+    NumberedPitch qp;
+    for(int i = 0; i < 4; i++){ // magic constant replaced in main program
+        qp.setPitch(getQuantizedPitch(i, tmp)); 
+        rvals.push_back(getRval(i));
+        probs.push_back(getProb(i));
+        Note n { qp, rvals[i], probs[i] };
+        _notes.push(n);
+        tmp.setPitch(qp);
+    }
 }
 
 

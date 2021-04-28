@@ -65,7 +65,7 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
         HarmonicFieldManager hfman3;
         HarmonicFieldManager hfman4;
         const vector <HarmonicFieldManager*> hfmanager {&hfman1, &hfman2, &hfman3, &hfman4};
-
+        QuantizedPitchManager qpmanager {hfmanager};
 
         // Midi setup
         void drawMidiMessages();

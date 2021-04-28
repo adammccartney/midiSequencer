@@ -275,14 +275,14 @@ class HarmonicFieldManager{
     public:
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
         HarmonicFieldManager();
+        HarmonicFieldManager& operator=(const HarmonicFieldManager& n);
+        
         NumberedPitch getQuantizedPitch(NumberedPitch inpitch);
         int getProb() { return _probability; }
         int getRtime() { return _rtime; }
         void setFillData();
         vector<int> getFillData() { return _filldata;  }
         void init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
-
-        void setup() { _hfgraph.setup(); }
 
     private:
         HarmonicField _hfield;
@@ -303,17 +303,11 @@ class QuantizedPitchManager{
     // Coordinates the incoming and outgoing messages
     //
 public:
-    QuantizedPitchManager(const vector<HarmonicFieldManager> &hfm);
+    QuantizedPitchManager(const vector<HarmonicFieldManager*> &hfm);
     QuantizedPitchManager();
 
-    void setup() { for(int i = 0; i < numFields(); i++) _vhfm[i].setup(); }
-    
-    //void draw();  // create an array of four quantized pitches on the heap
-                    // make sure these get destroyed once they are sent via osc
-    
-    //void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
+    void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
     NumberedPitch getOriginalPitch() { return _pitch; }
-    int numFields(){ return _numfields; }
     NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
 
     Note getNote() { return _notes.front(); }
@@ -326,8 +320,8 @@ private:
     Note makeNote(NumberedPitch &p, float &prob, float &rtime);
     NumberedPitch _pitch;
     int _numfields; // set by size of constructor's vector
-    vector<HarmonicFieldManager> _vhfm; 
-    queue<Note> _notes;
+    const vector<HarmonicFieldManager*> _vhfm; 
+    queue<Note> _notes;                
 };
 
 
