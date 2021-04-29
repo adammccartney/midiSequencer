@@ -4,7 +4,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetVerticalSync(true);
-    ofBackground(238, 255, 153);
+    ofBackground(192,192,192);
     ofSetFrameRate(60);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     vagRounded.load("vag.ttf", 24);
