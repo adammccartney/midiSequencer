@@ -8,7 +8,7 @@
 #   The location of your root openFrameworks installation
 #       (default) OF_ROOT = ../../.. 
 ################################################################################
-OF_ROOT = /home/adam/openFrameworks
+# OF_ROOT = $HOME/openFrameworks
 
 ################################################################################
 # PROJECT ROOT
@@ -16,7 +16,7 @@ OF_ROOT = /home/adam/openFrameworks
 #       (default) PROJECT_ROOT = . (this directory)
 #    
 ################################################################################
-PROJECT_ROOT = /home/adam/openFrameworks/apps/myApps/midiSequencer
+PROJECT_ROOT = .
 
 ################################################################################
 # PROJECT SPECIFIC CHECKS
