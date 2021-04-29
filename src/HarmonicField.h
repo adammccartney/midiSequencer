@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOsc.h"
 #include <vector>
 #include <map>
 #include <queue>
@@ -167,9 +168,8 @@ class Note{
 
 public:
 
-    Note(NumberedPitch &np, float rtime, float prob)  // relative temporal position 
+    Note(NumberedPitch &np, int rtime, int prob)  // relative temporal position 
         : _pitch { np }, _rtime { rtime }, _probability { prob } { } 
-    
     Note();
 
     Note(const Note& n); // copy constructor 
@@ -183,8 +183,8 @@ public:
 
 private:
     NumberedPitch _pitch;
-    float _rtime;
-    float _probability;
+    int _rtime;
+    int _probability;
 
 };
 
@@ -306,12 +306,12 @@ public:
     QuantizedPitchManager(const vector<HarmonicFieldManager*> &hfm);
     QuantizedPitchManager();
 
-    void processMidiNote(/*const ofxMidiIn &in*/const int &midiVal); // test with midi note 
+    void processMidiNote(const int &midiVal, ofxOscMessage &m); // test with midi note 
     NumberedPitch getOriginalPitch() { return _pitch; }
     NumberedPitch getQuantizedPitch(int hfindex, NumberedPitch p);
 
     Note getNote() { return _notes.front(); }
-    void popNote(); 
+    void popNote() { _notes.pop(); } 
 
     int getRval(int n); // gets xcoord of nth harmonic field graph
     int getProb(int n); // gets ycoord of nth harmonic field graph

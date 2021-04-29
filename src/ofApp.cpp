@@ -85,9 +85,10 @@ void ofApp::drawMidiMessages(){
 			if(message.status == MIDI_NOTE_ON ||
 			   message.status == MIDI_NOTE_OFF) {
 				text << "\tpitch: " << message.pitch;
-                // this is where we create the outgoing notes
-                qpmanager.processMidiNote(message.pitch);
-				ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
+                ofxOscMessage m; // each incoming midi note gets once osc msg
+                qpmanager.processMidiNote(message.pitch, m);
+				sender.sendMessage(m, false);
+                ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
 					ofMap(message.pitch, 0, 127, 0, ofGetWidth()*0.2), 10);
 				text << "\tvel: " << message.velocity;
 				ofDrawRectangle(x + (ofGetWidth()*0.2 * 2), y + 12,

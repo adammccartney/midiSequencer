@@ -493,15 +493,15 @@ int QuantizedPitchManager::getProb(int n) // gets ycoord of nth harmonic field g
 // the object
 
 
-void QuantizedPitchManager::processMidiNote(const int &midiVal)
+void QuantizedPitchManager::processMidiNote(const int &midiVal, ofxOscMessage &m)
 {
     NumberedPitch tmp { midiVal };
     _pitch = NumberedPitch { tmp } ; // set this as our starting pitch
    
-    vector<float> rvals;
-    vector<float> probs;
+    vector<int> rvals;
+    vector<int> probs;
     NumberedPitch qp;
-    for(int i = 0; i < 4; i++){ // magic constant replaced in main program
+    for(int i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
         qp.setPitch(getQuantizedPitch(i, tmp)); 
         rvals.push_back(getRval(i));
         probs.push_back(getProb(i));
@@ -509,12 +509,21 @@ void QuantizedPitchManager::processMidiNote(const int &midiVal)
         _notes.push(n);
         tmp.setPitch(qp);
     }
-}
-
-
-void QuantizedPitchManager::popNote()
-{
-    _notes.pop();
+    // send the osc message
+    NumberedPitch np;
+    int qmidival, rval, prob;
+    for(int i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
+        Note n { getNote() };
+        np        = n.getPitch();
+        qmidival  = np.asInt();
+        rval      = n.getRtime();
+        prob      = n.getProb();
+        m.setAddress("/test");
+        m.addIntArg(qmidival);
+        m.addIntArg(rval);
+        m.addIntArg(prob);
+        popNote(); // pop the note from queue as soon as we extract the vals
+    }
 }
 
 

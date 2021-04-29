@@ -4,7 +4,6 @@
 #include "ofxGui.h"
 #include "HarmonicField.h"
 #include "ofxMidi.h"
-#include "ofxOsc.h"
 
 //----------------------------------------------------------------------------
 // Setup for Osc, define socket info
