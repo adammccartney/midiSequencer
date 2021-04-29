@@ -213,39 +213,45 @@ void ofApp::newMidiMessage(ofxMidiMessage& msg) {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if(key == '?'){
-			midiIn.listInPorts();
+        midiIn.listInPorts();
     }else if(key ==  'c'){
-            commstring += "Opens midi port 1, receives messages\n";
-            commstring += "quantizes according to harmonic fields\n";
-            commstring += "sends four notes out via Osc on port 12345\n";
-            commstring += "Osc Message contents: midi val, x pos, y pos\n";
+        commstring.clear();
+        commstring += "Midi port 1 is open from startup to receive messages\n";
+        commstring += "each incoming midi note passes through 4 quantizers\n";
+        commstring += "notes are aggregated and output via Osc on port 12345\n";
+        commstring += "Osc Message contents: midi val, x pos, y pos\n";
     }else if(key == 'g'){
-            guistring += "Four params per harmonic field are set via gui:\n";
-            guistring += "x position can be used for temporal position\n";
-            guistring += "y position can be used for note probability\n";
-            guistring += "mode sets the interval segment used to create scale\n";
-            guistring += "root sets the root pitch of scale\n";
+        guistring.clear();    
+        guistring += "Four params per harmonic field are set via gui:\n";
+        guistring += "x position can be used for temporal position\n";
+        guistring += "y position can be used for note probability\n";
+        guistring += "mode sets the interval segment used to create scale\n";
+        guistring += "root sets the root pitch of scale\n";
     }else if(key == 'h'){
-            helpstring += "Help Menu: \n(c)omms \n(g)ui \n(m)ode \n";
+        helpstring.clear();
+        helpstring += "Help Menu: \n(c)omms \n(g)ui \n(m)ode \n(s)tate \n";
     }else if(key == 'm'){
-            modestring += "0: major\t 9: dom7\n";
-            modestring += "1: minor\t 10: maj6\n"; 
-            modestring += "2: Hminor\t 11: min6\n";
-            modestring += "3: dorian\t 12: six4\n";
-            modestring += "4: phrygian\t 13: minsix4\n";
-            modestring += "5: lydian\t 14: six5\n";
-            modestring += "6: mixolydian\t 15: minsix5\n";
-            modestring += "7: locrian\t 16: five4\n";
-            modestring += "8: maj7\t 17: four2\n";
+        modestring.clear();
+        modestring += "0: major\t 9: dom7\n";
+        modestring += "1: minor\t 10: maj6\n"; 
+        modestring += "2: Hminor\t 11: min6\n";
+        modestring += "3: dorian\t 12: six4\n";
+        modestring += "4: phrygian\t 13: minsix4\n";
+        modestring += "5: lydian\t 14: six5\n";
+        modestring += "6: mixolydian\t 15: minsix5\n";
+        modestring += "7: locrian\t 16: five4\n";
+        modestring += "8: maj7\t 17: four2\n";
 	}else if(key == 'r'){
-            rootstring += "0: c\t  6: fs\n";
-            rootstring += "1: cs\t 7: g\n";
-            rootstring += "2: d\t  8: gs\n";
-            rootstring += "3: ds\t 9: a\n";
-            rootstring += "4: e\t  10: as\n";
-            rootstring += "5: f\t  11: b\n";
+        rootstring.clear();
+        rootstring += "0: c\t  6: fs\n";
+        rootstring += "1: cs\t 7: g\n";
+        rootstring += "2: d\t  8: gs\n";
+        rootstring += "3: ds\t 9: a\n";
+        rootstring += "4: e\t  10: as\n";
+        rootstring += "5: f\t  11: b\n";
     }else if(key == 's'){
-            statestring += "state can be saved as xml via the gui\n";
+        statestring.clear();
+        statestring += "state can be saved as xml via the gui\n";
     }
 }
 
