@@ -1,4 +1,4 @@
-## midi Sequencer
+## midi Sequencer v0.1.1
 
 
 A simple openFrameworks project that generates a four note midi sequence given
@@ -10,7 +10,6 @@ a note in.
 
 ![gui screenshot](img/guiScreenshot.png)
 
-***currently a pre-release and nder heavy construction***
 
 ## Compilation 
 
@@ -22,7 +21,7 @@ make
 make RunRelease
 ```
 
-# Usage
+## Usage
 
 It's intended to be used as a single component in a modular toolchain. midi
 Sequencer receives notes from a midi port and communicates the generated

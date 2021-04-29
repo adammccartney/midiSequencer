@@ -177,6 +177,18 @@ void ofApp::draw(){
     
     ofSetColor(255,122,220);
     vagRounded.drawString(commstring, 90, 500 );
+    
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(rootstring, 98, 448 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(rootstring, 100, 450 );
+
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(statestring, 98, 448 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(statestring, 100, 450 );
 }
 
 //--------------------------------------------------------------
@@ -203,10 +215,10 @@ void ofApp::keyPressed(int key){
     if(key == '?'){
 			midiIn.listInPorts();
     }else if(key ==  'c'){
-            commstring += "Communication: takes midi messages on port 0\n";
+            commstring += "Opens midi port 1, receives messages\n";
             commstring += "quantizes according to harmonic fields\n";
             commstring += "sends four notes out via Osc on port 12345\n";
-            commstring += "Osc Message contents: midi val, x pos, ypos\n";
+            commstring += "Osc Message contents: midi val, x pos, y pos\n";
     }else if(key == 'g'){
             guistring += "Four params per harmonic field are set via gui:\n";
             guistring += "x position can be used for temporal position\n";
@@ -225,7 +237,16 @@ void ofApp::keyPressed(int key){
             modestring += "6: mixolydian\t 15: minsix5\n";
             modestring += "7: locrian\t 16: five4\n";
             modestring += "8: maj7\t 17: four2\n";
-	}
+	}else if(key == 'r'){
+            rootstring += "0: c\t  6: fs\n";
+            rootstring += "1: cs\t 7: g\n";
+            rootstring += "2: d\t  8: gs\n";
+            rootstring += "3: ds\t 9: a\n";
+            rootstring += "4: e\t  10: as\n";
+            rootstring += "5: f\t  11: b\n";
+    }else if(key == 's'){
+            statestring += "state can be saved as xml via the gui\n";
+    }
 }
 
 //--------------------------------------------------------------
@@ -238,6 +259,10 @@ void ofApp::keyReleased(int key){
             helpstring.clear();
     }else if(key == 'm'){
             modestring.clear();
+    }else if(key == 'r'){
+            rootstring.clear();
+    }else if(key == 's'){
+            statestring.clear();
     }
 }
 

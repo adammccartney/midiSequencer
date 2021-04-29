@@ -97,4 +97,6 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
         string modestring;
         string guistring;
         string commstring;
+        string rootstring;
+        string statestring;
 };
