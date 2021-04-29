@@ -34,9 +34,9 @@ for an instrument).
 
 30. April 2021
 
-+ add help menu (work with h key to toggle display of available modes)
-+ fix missing rvalue and prob inclusion
-+ remove note offs from midi process
++ ~~add help menu (work with h key to toggle display of available modes)~~
++ ~~fix missing rvalue and prob inclusion~~
++ ~~remove note offs from osc message~~
 
 29. April 2021
 + ~~set up Osc routing~~

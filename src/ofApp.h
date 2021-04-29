@@ -90,4 +90,11 @@ class ofApp : public ofBaseApp, public ofxMidiListener {
 
         // Osc setup
         ofxOscSender sender;
+
+        // help menu
+        ofTrueTypeFont vagRounded;
+        string helpstring;
+        string modestring;
+        string guistring;
+        string commstring;
 };

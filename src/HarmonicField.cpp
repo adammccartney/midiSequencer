@@ -409,8 +409,10 @@ HarmonicFieldManager::HarmonicFieldManager(){}
 
 void HarmonicFieldManager::init(HarmonicField &hfield, HarmonicFieldGraph &hfgraph)
 {
-    _pitchset = hfield.getPitchSet();
+    _pitchset      = hfield.getPitchSet();
     _pitchclassset = hfield.getPitchClassSet();
+    _rtime         = hfgraph.getXPos();
+    _probability   = hfgraph.getYPos();
 }
 
 void HarmonicFieldManager::setFillData(){
@@ -498,14 +500,13 @@ void QuantizedPitchManager::processMidiNote(const int &midiVal, ofxOscMessage &m
     NumberedPitch tmp { midiVal };
     _pitch = NumberedPitch { tmp } ; // set this as our starting pitch
    
-    vector<int> rvals;
-    vector<int> probs;
+    int rvalue, probability;
     NumberedPitch qp;
     for(int i = 0; i < constants::GLOBAL_CONST_NUM_HFIELDS; i++){
         qp.setPitch(getQuantizedPitch(i, tmp)); 
-        rvals.push_back(getRval(i));
-        probs.push_back(getProb(i));
-        Note n { qp, rvals[i], probs[i] };
+        rvalue = getRval(i);
+        probability = getProb(i);
+        Note n { qp, rvalue, probability };
         _notes.push(n);
         tmp.setPitch(qp);
     }

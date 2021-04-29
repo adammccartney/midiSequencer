@@ -7,6 +7,7 @@ void ofApp::setup(){
     ofBackground(238, 255, 153);
     ofSetFrameRate(60);
 	ofSetLogLevel(OF_LOG_VERBOSE);
+    vagRounded.load("vag.ttf", 24);
 
 	// print input ports to console
     midiIn.listInPorts();
@@ -36,6 +37,7 @@ void ofApp::setup(){
     }
     // send back shading data
     gui.setup(mainGroup);
+
 }
 
 //--------------------------------------------------------------
@@ -63,6 +65,7 @@ void ofApp::update(){
     
 }
 
+
 void ofApp::drawMidiMessages(){
     for(unsigned int i = 0; i < midiMessages.size(); ++i) {
 
@@ -82,12 +85,14 @@ void ofApp::drawMidiMessages(){
 		ofSetColor(127);
 		if(message.status < MIDI_SYSEX) {
 			text << "chan: " << message.channel;
+            if(message.status == MIDI_NOTE_ON) {
+                ofxOscMessage m; // each incoming midi note on gets once osc msg
+                qpmanager.processMidiNote(message.pitch, m);
+				sender.sendMessage(m, false);
+            }
 			if(message.status == MIDI_NOTE_ON ||
 			   message.status == MIDI_NOTE_OFF) {
 				text << "\tpitch: " << message.pitch;
-                ofxOscMessage m; // each incoming midi note gets once osc msg
-                qpmanager.processMidiNote(message.pitch, m);
-				sender.sendMessage(m, false);
                 ofDrawRectangle(x + ofGetWidth()*0.2, y + 12,
 					ofMap(message.pitch, 0, 127, 0, ofGetWidth()*0.2), 10);
 				text << "\tvel: " << message.velocity;
@@ -147,6 +152,31 @@ void ofApp::draw(){
         hfgrphs[i]->draw();
     }
     gui.draw();
+
+    // Draw help strings 
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(helpstring, 98, 498 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(helpstring, 100, 500 );
+
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(modestring, 98, 448 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(modestring, 100, 450 );
+    
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(guistring, 98, 498 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(guistring, 100, 500 );
+    
+    ofSetHexColor(0xffffff);
+    vagRounded.drawString(commstring, 88, 498 );
+    
+    ofSetColor(255,122,220);
+    vagRounded.drawString(commstring, 90, 500 );
 }
 
 //--------------------------------------------------------------
@@ -170,17 +200,47 @@ void ofApp::newMidiMessage(ofxMidiMessage& msg) {
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    switch(key) {
-		case '?':
+    if(key == '?'){
 			midiIn.listInPorts();
-			break;
+    }else if(key ==  'c'){
+            commstring += "Communication: takes midi messages on port 0\n";
+            commstring += "quantizes according to harmonic fields\n";
+            commstring += "sends four notes out via Osc on port 12345\n";
+            commstring += "Osc Message contents: midi val, x pos, ypos\n";
+    }else if(key == 'g'){
+            guistring += "Four params per harmonic field are set via gui:\n";
+            guistring += "x position can be used for temporal position\n";
+            guistring += "y position can be used for note probability\n";
+            guistring += "mode sets the interval segment used to create scale\n";
+            guistring += "root sets the root pitch of scale\n";
+    }else if(key == 'h'){
+            helpstring += "Help Menu: \n(c)omms \n(g)ui \n(m)ode \n";
+    }else if(key == 'm'){
+            modestring += "0: major\t 9: dom7\n";
+            modestring += "1: minor\t 10: maj6\n"; 
+            modestring += "2: Hminor\t 11: min6\n";
+            modestring += "3: dorian\t 12: six4\n";
+            modestring += "4: phrygian\t 13: minsix4\n";
+            modestring += "5: lydian\t 14: six5\n";
+            modestring += "6: mixolydian\t 15: minsix5\n";
+            modestring += "7: locrian\t 16: five4\n";
+            modestring += "8: maj7\t 17: four2\n";
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+    if(key == 'c'){
+            commstring.clear(); 
+    }else if(key == 'g'){
+            guistring.clear();
+    }else if(key == 'h'){
+            helpstring.clear();
+    }else if(key == 'm'){
+            modestring.clear();
+    }
 }
+
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
