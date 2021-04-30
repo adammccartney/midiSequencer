@@ -62,7 +62,6 @@ void ofApp::update(){
         hfmanager[i]->setFillData();
         hfgrphs[i]->setFillData(hfmanager[i]->getFillData());
     }
-    
 }
 
 

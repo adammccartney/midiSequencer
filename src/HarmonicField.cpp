@@ -49,20 +49,22 @@ void HarmonicFieldGraph::setup(){
     localMin  = hfxOrigin;
     localMax  = hfxOrigin + length - getWidth(); 
 
+    // Set defaults for the display at startup
     Mode defaultmode = Mode::MAJOR;
     PitchClass defaultroot = PitchClass::c;
 
+    // Set up the listeners to detect changes in settings via the GUI
+    // each parameter has a name, starting point, min and max values
     params.setName(toString());
     params.add(x.set("x", hfxOrigin, localMin, localMax));
     params.add(y.set("y", ofGetHeight() / 2, 0, ofGetHeight())); 
     params.add(mode.set("MODE", defaultmode, Mode::MAJOR, Mode::FOUR2));
     params.add(root.set("ROOT", defaultroot, PitchClass::c, PitchClass::b));
 
-
     update();
 }
 
-void HarmonicFieldGraph::updatePoints(){
+void HarmonicFieldGraph::update(){
     // this grabs info from the gui Sliders and updates the shape's data 
 
     keypoints.clear();
@@ -75,10 +77,6 @@ void HarmonicFieldGraph::updatePoints(){
                               ofVec2f(x, y - i*10 - _height)};
         keypoints.push_back(vec);
     }
-}
-
-void HarmonicFieldGraph::update(){
-    updatePoints();
 }
 
 void HarmonicFieldGraph::draw(){
@@ -96,14 +94,16 @@ void HarmonicFieldGraph::draw(){
         // color according to piano keyboard
         PitchClass x = (PitchClass)i; 
         
+        // this loop draws the keys based on current settings of GUI params
+        // if the pitch classes correspond to black piano keys, color black
         if((x == PitchClass::cs) || (x == PitchClass::ds) || 
                 (x == PitchClass::fs) || (x == PitchClass::gs) || 
                 (x == PitchClass::as)){
             npath.setStrokeColor(ofColor::black);
             npath.setFillColor(ofColor::black);
-            npath.setFilled(_filldata[i]); // visualizes harmonic info 
+            npath.setFilled(_filldata[i]); // keys filled if in current mode 
             npath.setStrokeWidth(2); 
-        }else{
+        }else{ // otherwise the keys are white
             npath.setStrokeColor(ofColor::white);
             npath.setFillColor(ofColor::white);
             npath.setFilled(_filldata[i]);
@@ -122,6 +122,7 @@ string HarmonicFieldGraph::toString(){
 
 //------------------------------------------------------------
 // assign a numeric value to harmonic field based on name
+// This is used in the setup above
 //
 void HarmonicFieldGraph::setID(){
     switch(this->name){
@@ -146,6 +147,8 @@ void HarmonicFieldGraph::setID(){
 }
 
 void HarmonicFieldGraph::setFillData(const vector<int> &filldata){
+// This is used to visualize what Scale is currently instantiated 
+// This depends on the settings given to the parameters of mode and root
     for(auto i = 0; i < filldata.size(); i++){
         if(filldata[i] == 1){
             _filldata[i] = true;
@@ -153,7 +156,6 @@ void HarmonicFieldGraph::setFillData(const vector<int> &filldata){
         else
             _filldata[i] = false;
     }
-    // pass this info to GUI
 }
 
 //----------------------------------------------------------------------------
@@ -262,18 +264,6 @@ string Note::toString()
 }
 
 //-----------------------------------------------------------------------------
-// IntervalSegment
-// Constructors
-
-IntervalSegment::IntervalSegment(){}
-
-IntervalSegment::IntervalSegment(vector<int> v) : intervals { v }{}
-
-//-----------------------------------------------------------------------------
-// Interval segment manager: used to handle the interval distribution needed to
-// construct a harmonic field in a specific tonality.
-// i.e. The interval values stored here are an abstraction and describe a path
-// of n steps through an octave. 
 
 IntervalSegmentManager::IntervalSegmentManager(){ makeMap(); }
 
@@ -303,12 +293,20 @@ void IntervalSegmentManager::makeMap() {
 }
 
 //-----------------------------------------------------------------------------
+// IntervalSegment
+// Constructors
+
+IntervalSegment::IntervalSegment(){}
+
+IntervalSegment::IntervalSegment(vector<int> v) : intervals { v }{}
+
+
+//-----------------------------------------------------------------------------
 // Higher level logic classes, factories and managers
 // 
 //
-// PitchSetManager
-// handles construction of pitch and pitch class sets, given ref to root & mode
 
+// PitchSetManager
 // Constructors
 //
 PitchSetManager::PitchSetManager(PitchClass &root, IntervalSegment &mode)
@@ -443,7 +441,7 @@ NumberedPitch HarmonicFieldManager::getQuantizedPitch(NumberedPitch inpitch){
         return *p;
     }
     else{
-        inpitch.transpose(+1);
+        inpitch.transpose(+1);    // 
         return getQuantizedPitch(inpitch);
     }
 }

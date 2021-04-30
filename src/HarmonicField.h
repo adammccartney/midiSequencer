@@ -16,11 +16,18 @@
 //----------------------------------------------------------------------------
 // PitchClass and Mode enums: basic elements for all further construction
 //
-enum Mode { MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
+enum Mode { 
+// Musical Mode refers to an abstract set of harmonic proportions.
+// This list is somewhat arbitrary, it features the 7 common church modes, the
+// harmonic minor and then a selection of specific tonal harmonies that are
+// named according to Figured Bass logic 
+    MAJOR = 0, MINOR, HMINOR, DORIAN, PHRYGIAN, LYDIAN, MIXOLYDIAN, 
     LOCRIAN, MAJ7, DOM7, MAJ6, MIN6, SIX4, MINSIX4, SIX5, MINSIX5,
     FIVE4, FOUR2, MODECOUNT };
 
 enum PitchClass {
+// PitchClass is a common musical term, it refers to the 12 chromatic pitches,
+// starting at c=0 and ascending until b=11
     c, cs, d, ds, e, f, fs, g, gs, a, as, b
 };
 
@@ -33,7 +40,8 @@ PitchClass operator--(PitchClass& pc);
 //
 
 class TimespanGraph{
-   // timespan acts mostly as a reference to the HarmonicFields
+   // TimespanGraph is a horizontal line that is used to calculate the
+   // positioning for the Harmonic Field Graph instances  
 
 public:
 
@@ -60,6 +68,8 @@ private:
 //
 
 class HarmonicFieldGraph{
+// Allows user to visualize their input as they set parameters for musical mode
+// and root, along with rhythmic and probabilistic information 
 
 public:
     HarmonicFieldGraph(char n, TimespanGraph& ts); 
@@ -71,7 +81,6 @@ public:
     void update();
 
     void updateHarmonicFandFill();
-    void updatePoints();
 
     ofParameterGroup params;
     ofParameter<int> x;
@@ -111,10 +120,8 @@ private:
 // Pitch and Interval Datatypes 
 //
 
-//----------------------------------------------------------------------------
-//
-
 class NumberedPitchClass {
+// Refers to one of twelve possible chromatic pitch classes 
 
 public:
     // numbered according to midi note values in the middle c octave (60-72)
@@ -139,9 +146,9 @@ private:
 //
 
 class NumberedPitch {
+// Refers to one of 128 possible pitches: midi note values (0, 127) = (C-2, G8)
     
 public:
-    // numbered according to midi note values (0, 127) = (C-2, G8)
     NumberedPitch(int v) : _val { v }{ }
     NumberedPitch();
     // compiler makes simple destructor by default
@@ -162,10 +169,13 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Note
 
 class Note{
-
+// Note: this is an important class for the output, as it is used to store
+// information about the incoming midi note after it has been quantized, along
+// with the x y position data that is taken from the position of harmonic field
+// graphs on the gui. this x y data is intended to be used as timing and
+// probability info
 public:
 
     Note(NumberedPitch &np, int rtime, int prob)  // relative temporal position 
@@ -189,17 +199,15 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-//TODO: make this generic so it can be used for floats (microtones) too
-
-struct IntervalSegment {
-    // construct using an integer list (number of semitones)
-    IntervalSegment(vector<int> v);
-    IntervalSegment();
-    //IntervalSegment(const IntervalSegment& is);
-    vector<int> intervals;
-};
+// Classes used to set up on of the basic construction components for musical
+// scales. A scale is constructed using a set of intervals (represented by
+// integers) and a specific root note (represented by a PitchClass
 
 class IntervalSegmentManager{
+// Interval segment manager: used to handle the interval distribution needed to
+// construct a harmonic field in a specific tonality.
+// i.e. The interval values stored here are an abstraction and describe a path
+// of n steps through an octave. 
 
 public:
     IntervalSegmentManager();
@@ -207,6 +215,16 @@ public:
 
 private:
     static void makeMap();
+};
+
+struct IntervalSegment {
+    // Interval Segment is simply a wrapper for an integer vector,
+    // this works closely with the IntervalSegmentManager
+    // construct using an integer list (number of semitones)
+    IntervalSegment(vector<int> v);
+    IntervalSegment();
+    //IntervalSegment(const IntervalSegment& is);
+    vector<int> intervals;
 };
 
 //-----------------------------------------------------------------------------
@@ -218,12 +236,11 @@ private:
 //
 
 class PitchSetManager{
-
+// handles construction of pitch and pitch class sets, given ref to root & mode
 public:
     // Interface class to manage the subset of relevant steps for quantizer
     PitchSetManager(PitchClass &root, IntervalSegment &mode);
     PitchSetManager();
-    // define copy constructor
     PitchSetManager(const PitchSetManager& n); // copy constructor 
     PitchSetManager& operator=(const PitchSetManager& n);
 
@@ -250,7 +267,7 @@ private:
 ////
 
 class HarmonicField{
-
+// provides access to sets of NumberedPitchClass and NumberedPitch 
 public:
     HarmonicField(PitchSetManager &psman) 
         : _psman { psman } {}
@@ -266,12 +283,10 @@ private:
 
 };
 
-
-////-----------------------------------------------------------------------------
-//// HarmonicFieldManager: quantizes pitches according to field attributes
+//-----------------------------------------------------------------------------
 
 class HarmonicFieldManager{
-
+// quantize a Pitch according to field attributes
     public:
         HarmonicFieldManager(HarmonicField &hfield, HarmonicFieldGraph &hfgraph);
         HarmonicFieldManager();
@@ -300,8 +315,7 @@ class HarmonicFieldManager{
 ////
 
 class QuantizedPitchManager{
-    // Coordinates the incoming and outgoing messages
-    //
+// Coordinate the incoming (midi) and outgoing (osc) messages
 public:
     QuantizedPitchManager(const vector<HarmonicFieldManager*> &hfm);
     QuantizedPitchManager();
