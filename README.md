@@ -39,8 +39,8 @@ for an instrument).
 /[a-g][s]?/
 ```
 
-example:
-cs := c sharp 
+**example**
++ cs := c sharp 
 
 12 pitch classes in total: {c, cs, d, ds, e, f, fs, g, gs, a, as, b}
 
@@ -56,10 +56,10 @@ P       := perfect
 [digit] := diatonic interval
 ```
 
-example: 
-M2 = major second   = 2 semitones
-m3 = minor third    = 3 semitones
-P4 = perfect fourth = 5 semitones 
+**example** 
++ M2 = major second   = 2 semitones
++ m3 = minor third    = 3 semitones
++ P4 = perfect fourth = 5 semitones 
 
 | name       | interval structure    |
 |------------|-----------------------|
