@@ -33,14 +33,28 @@ for an instrument).
 
 ### Pitch Classes
 
+*enharmonics discounted out of love for the robots*
+
+```
+/[a-g][s]?/
+```
+
+example:
+cs := c sharp 
+
+12 pitch classes in total: {c, cs, d, ds, e, f, fs, g, gs, a, as, b}
+
 ### Modes
 
 **legend for intervals**
-[M|m|P][digit]
+```
+/[M|m|P][digit]/
+
 M       := major
 m       := minor
 P       := perfect
 [digit] := diatonic interval
+```
 
 example: 
 M2 = major second   = 2 semitones
