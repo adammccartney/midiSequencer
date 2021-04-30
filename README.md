@@ -61,24 +61,24 @@ P       := perfect
 + m3 = minor third    = 3 semitones
 + P4 = perfect fourth = 5 semitones 
 
-| name       | interval structure    |
-|------------|-----------------------|
-| major      | M2 M2 m2 M2 M2 M2 m2  |
-| minor      | M2 m2 M2 M2 m2 M2 M2  |
-| hminor     | M2 m2 M2 M2 m2 m3 m2  | 
-| dorian     | M2 m2 M2 M2 M2 m2 M2  |
-| phrygian   | m2 M2 M2 M2 m2 M2 M2  |
-| lydian     | M2 M2 M2 m2 M2 M2 m2  |
-| mixolydian | M2 M2 m2 M2 M2 m2 M2  |
-| locrian    | m2 M2 M2 M2 m2 M2 M2  |
-| maj7       | M3 m3 M3              |
-| dom7       | M3 m3 m3              |
-| maj6       | M3 P4 m3              |
-| min6       | m3 P4 m3              |
-| six4       | P4 M3 m3              |
-| minsix4    | P4 m3 M3              |
-| six5       | m3 m3 M2 M3           |
-| minsix5    | M3 m3 M2 M3           |
-| five4      | P4 M2                 |
-| four2      | M2 m3                 |
+| param no. | name       | interval structure    |
+|-----------|------------|-----------------------|
+| 0         | major      | M2 M2 m2 M2 M2 M2 m2  |
+| 1         | minor      | M2 m2 M2 M2 m2 M2 M2  |
+| 2         | hminor     | M2 m2 M2 M2 m2 m3 m2  | 
+| 3         | dorian     | M2 m2 M2 M2 M2 m2 M2  |
+| 4         | phrygian   | m2 M2 M2 M2 m2 M2 M2  |
+| 5         | lydian     | M2 M2 M2 m2 M2 M2 m2  |
+| 6         | mixolydian | M2 M2 m2 M2 M2 m2 M2  |
+| 7         | locrian    | m2 M2 M2 M2 m2 M2 M2  |
+| 8         | maj7       | M3 m3 M3              |
+| 9         | dom7       | M3 m3 m3              |
+| 10        | maj6       | M3 P4 m3              |
+| 11        | min6       | m3 P4 m3              |
+| 12        | six4       | P4 M3 m3              |
+| 13        | minsix4    | P4 m3 M3              |
+| 14        | six5       | m3 m3 M2 M3           |
+| 15        | minsix5    | M3 m3 M2 M3           |
+| 16        | five4      | P4 M2                 |
+| 17        | four2      | M2 m3                 |
 
